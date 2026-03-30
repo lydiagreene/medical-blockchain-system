@@ -1,0 +1,106 @@
+medical-blockchain-system/          ← Root project folder (your GitHub repo name)
+│
+├── manage.py                       ← Django's command centre (never edit this)
+├── requirements.txt                ← List of all Python packages to install
+├── .env                            ← Secret keys and API credentials (never share this)
+├── .gitignore                      ← Tells Git what files not to upload
+│
+├── verifydoc/                      ← Main Django project settings folder
+│   ├── __init__.py
+│   ├── settings.py                 ← All project settings (database, apps, keys)
+│   ├── urls.py                     ← Master URL routing file
+│   ├── wsgi.py                     ← Web server entry point
+│   └── asgi.py                     ← Async server entry point
+│
+├── accounts/                       ← App: handles all user roles and authentication
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py                   ← User, Institution, Role database models
+│   ├── views.py                    ← Login, logout, register, dashboard views
+│   ├── urls.py                     ← URL routes for accounts app
+│   ├── forms.py                    ← Login and registration forms
+│   ├── decorators.py               ← Role-based access control decorators
+│   └── migrations/
+│       └── __init__.py
+│
+├── credentials/                    ← App: core credential management
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py                   ← Credential, VerificationLog database models
+│   ├── views.py                    ← Issue, verify, revoke credential views
+│   ├── urls.py                     ← URL routes for credentials app
+│   ├── forms.py                    ← Credential registration form
+│   ├── serializers.py              ← Converts model data to JSON for API
+│   └── migrations/
+│       └── __init__.py
+│
+├── blockchain/                     ← App: all blockchain interaction logic
+│   ├── __init__.py
+│   ├── apps.py
+│   ├── contract.py                 ← Loads ABI and connects to smart contract
+│   ├── utils.py                    ← Helper functions: issue, verify, revoke on-chain
+│   └── abi/
+│       └── VerifyDoc.json          ← Smart contract ABI (generated after deployment)
+│
+├── biometrics/                     ← App: facial recognition logic
+│   ├── __init__.py
+│   ├── apps.py
+│   ├── face_utils.py               ← DeepFace comparison functions
+│   ├── views.py                    ← API endpoint that receives and compares photos
+│   └── urls.py
+│
+├── fraud_detection/                ← App: AI fraud pattern detection
+│   ├── __init__.py
+│   ├── apps.py
+│   ├── model.py                    ← scikit-learn Isolation Forest model
+│   ├── train.py                    ← Script to train model on verification logs
+│   ├── predict.py                  ← Runs prediction on new verification attempts
+│   └── saved_model/
+│       └── fraud_model.pkl         ← Saved trained model file
+│
+├── ipfs/                           ← App: IPFS document storage via Pinata
+│   ├── __init__.py
+│   ├── apps.py
+│   └── pinata_utils.py             ← Functions to upload and retrieve from IPFS
+│
+├── smart_contract/                 ← All Solidity blockchain files
+│   ├── VerifyDoc.sol               ← The main smart contract
+│   └── deployed_address.txt        ← Stores contract address after deployment
+│
+├── static/                         ← All static frontend files
+│   ├── css/
+│   │   ├── main.css                ← Global styles
+│   │   ├── dashboard.css           ← Dashboard-specific styles
+│   │   └── auth.css                ← Login/register page styles
+│   ├── js/
+│   │   ├── webcam.js               ← Handles webcam capture for biometrics
+│   │   ├── verify.js               ← Handles verification form submission
+│   │   └── dashboard.js            ← Dashboard interactivity
+│   └── images/
+│       └── logo.png                ← Project logo
+│
+├── templates/                      ← All HTML template files
+│   ├── base.html                   ← Master template all pages extend from
+│   ├── accounts/
+│   │   ├── login.html              ← Login page
+│   │   ├── register.html           ← Registration page
+│   │   └── dashboard_base.html     ← Shared dashboard layout
+│   ├── issuer/
+│   │   ├── dashboard.html          ← Issuer home dashboard
+│   │   └── register_credential.html ← Form to register new credential
+│   ├── verifier/
+│   │   ├── dashboard.html          ← Verifier home dashboard
+│   │   └── verify_credential.html  ← Verification page with webcam
+│   └── admin/
+│       ├── dashboard.html          ← Admin home dashboard
+│       ├── all_credentials.html    ← List of all registered credentials
+│       └── revoke_credential.html  ← Revocation confirmation page
+│
+├── media/                          ← Uploaded files (practitioner photos)
+│   └── practitioner_photos/        ← Stored temporarily before uploading to IPFS
+│
+└── logs/                           ← System logs
+    ├── verification_logs.csv       ← Used to train fraud detection model
+    └── system.log                  ← General application logs
