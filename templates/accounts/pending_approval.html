@@ -1,6 +1,71 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pending Approval | VerifyDoc Uganda</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f0f4f8;
+      font-family: Arial, sans-serif;
+    }
+    .pending-card {
+      max-width: 480px;
+      margin: 100px auto;
+      background: white;
+      border-radius: 12px;
+      padding: 50px 40px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      text-align: center;
+    }
+    .icon {
+      font-size: 4rem;
+      margin-bottom: 20px;
+    }
+    .title {
+      color: #1F3864;
+      font-weight: bold;
+      font-size: 1.4rem;
+      margin-bottom: 15px;
+    }
+    .message {
+      color: #666;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin-bottom: 30px;
+    }
+    .btn-back {
+      background-color: #1F3864;
+      color: white;
+      padding: 10px 30px;
+      border: none;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 0.95rem;
+    }
+    .btn-back:hover {
+      background-color: #2E5F8A;
+      color: white;
+    }
+  </style>
+</head>
 <body>
-  <h1>Account Pending Approval</h1>
+
+<div class="pending-card">
+  <div class="icon">⏳</div>
+  <div class="title">Account Pending Approval</div>
+  <div class="message">
+    Your account has been created successfully and is currently
+    awaiting approval from a VerifyDoc administrator.
+    <br><br>
+    You will be able to log in once your account has been approved.
+    This process typically takes 24 hours.
+  </div>
+  <a href="{% url 'accounts:login' %}" class="btn-back">
+    Back to Login
+  </a>
+</div>
+
 </body>
 </html>
