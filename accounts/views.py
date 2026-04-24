@@ -90,24 +90,49 @@ def register_view(request):
 
 @login_required
 def dashboard_view(request):
-    """
-    Routes each user to their role-specific dashboard
-    """
     user = request.user
+    from credentials.models import Credential, VerificationLog, CredentialStatus
 
     if user.is_superuser or user.role == Role.ADMIN:
-        return render(request, 'admin/dashboard.html', {'user': user})
+        context = {
+            'user': user,
+            'total_credentials': Credential.objects.count(),
+            'active_credentials': Credential.objects.filter(
+                status=CredentialStatus.ACTIVE).count(),
+            'revoked_credentials': Credential.objects.filter(
+                status=CredentialStatus.REVOKED).count(),
+            'total_verifications': VerificationLog.objects.count(),
+            'recent_credentials': Credential.objects.all()[:5],
+        }
+        return render(request, 'admin/dashboard.html', context)
 
     elif user.role == Role.ISSUER:
-        return render(request, 'issuer/dashboard.html', {'user': user})
+        credentials = Credential.objects.filter(issued_by=user)
+        context = {
+            'user': user,
+            'total_credentials': credentials.count(),
+            'active_credentials': credentials.filter(
+                status=CredentialStatus.ACTIVE).count(),
+            'revoked_credentials': credentials.filter(
+                status=CredentialStatus.REVOKED).count(),
+            'recent_credentials': credentials[:5],
+        }
+        return render(request, 'issuer/dashboard.html', context)
 
     elif user.role == Role.VERIFIER:
-        return render(request, 'verifier/dashboard.html', {'user': user})
+        logs = VerificationLog.objects.filter(verified_by=user)
+        context = {
+            'user': user,
+            'total_verifications': logs.count(),
+            'successful_verifications': logs.filter(
+                result='SUCCESS').count(),
+            'failed_verifications': logs.filter(
+                result__in=['FAILED', 'NOT_FOUND', 'REVOKED']).count(),
+            'recent_verifications': logs[:5],
+        }
+        return render(request, 'verifier/dashboard.html', context)
 
-    # Fallback
     return render(request, 'accounts/dashboard_base.html', {'user': user})
-
-
 # ───────────────────────────────────────────
 # PENDING APPROVAL VIEW
 # ───────────────────────────────────────────

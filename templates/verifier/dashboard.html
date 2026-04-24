@@ -1,6 +1,228 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verifier Dashboard | VerifyDoc Uganda</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background-color: #f0f4f8; font-family: Arial, sans-serif; }
+    .sidebar {
+      position: fixed; top: 0; left: 0;
+      width: 250px; height: 100vh;
+      background: #1F3864; color: white;
+      padding: 30px 20px; z-index: 100;
+    }
+    .sidebar-brand {
+      font-size: 1.2rem; font-weight: bold;
+      color: white; margin-bottom: 8px;
+    }
+    .sidebar-role {
+      font-size: 0.75rem; color: #a0b4d0;
+      margin-bottom: 30px; padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .sidebar-link {
+      display: block; color: #a0b4d0;
+      text-decoration: none; padding: 10px 15px;
+      border-radius: 8px; margin-bottom: 5px;
+      font-size: 0.9rem; transition: all 0.2s;
+    }
+    .sidebar-link:hover, .sidebar-link.active {
+      background: rgba(255,255,255,0.1); color: white;
+    }
+    .sidebar-link span { margin-right: 10px; }
+    .sidebar-bottom {
+      position: absolute; bottom: 30px; left: 20px; right: 20px;
+    }
+    .btn-logout {
+      display: block; width: 100%;
+      background: rgba(255,255,255,0.1);
+      color: white; border: none; padding: 10px;
+      border-radius: 8px; text-decoration: none;
+      text-align: center; font-size: 0.9rem;
+    }
+    .btn-logout:hover {
+      background: rgba(255,255,255,0.2); color: white;
+    }
+    .main-content { margin-left: 250px; padding: 30px; }
+    .page-header { margin-bottom: 30px; }
+    .page-header h4 { color: #1F3864; font-weight: bold; }
+    .page-header p { color: #666; font-size: 0.9rem; margin: 0; }
+    .stat-card {
+      background: white; border-radius: 12px;
+      padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+      margin-bottom: 20px;
+    }
+    .stat-number {
+      font-size: 2.5rem; font-weight: bold;
+      color: #1F3864; line-height: 1;
+    }
+    .stat-label { color: #666; font-size: 0.85rem; margin-top: 5px; }
+    .stat-icon { font-size: 2rem; float: right; opacity: 0.3; }
+    .action-card {
+      background: #1F3864; border-radius: 12px;
+      padding: 30px; color: white; margin-bottom: 20px;
+      box-shadow: 0 4px 15px rgba(31,56,100,0.3);
+    }
+    .action-card h5 { font-weight: bold; margin-bottom: 10px; }
+    .action-card p {
+      font-size: 0.9rem; color: #a0b4d0; margin-bottom: 20px;
+    }
+    .btn-action {
+      background: white; color: #1F3864;
+      border: none; padding: 10px 25px;
+      border-radius: 8px; font-weight: bold;
+      text-decoration: none; font-size: 0.9rem;
+    }
+    .btn-action:hover { background: #f0f4f8; color: #1F3864; }
+    .table-card {
+      background: white; border-radius: 12px;
+      padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    }
+    .table-title {
+      color: #1F3864; font-weight: bold;
+      font-size: 1rem; margin-bottom: 20px;
+    }
+    .badge-success {
+      background: #d4edda; color: #155724;
+      padding: 4px 10px; border-radius: 20px; font-size: 0.78rem;
+    }
+    .badge-failed {
+      background: #f8d7da; color: #721c24;
+      padding: 4px 10px; border-radius: 20px; font-size: 0.78rem;
+    }
+    .badge-notfound {
+      background: #fff3cd; color: #856404;
+      padding: 4px 10px; border-radius: 20px; font-size: 0.78rem;
+    }
+  </style>
+</head>
 <body>
-  <h1>Verifier Dashboard - Coming Soon</h1>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="sidebar-brand">VerifyDoc Uganda</div>
+  <div class="sidebar-role">Verifier Dashboard</div>
+
+  <a href="{% url 'accounts:dashboard' %}" class="sidebar-link active">
+    <span>🏠</span> Dashboard
+  </a>
+  <a href="{% url 'credentials:verify' %}" class="sidebar-link">
+    <span>🔍</span> Verify Credential
+  </a>
+
+  <div class="sidebar-bottom">
+    <div style="color:#a0b4d0; font-size:0.8rem; margin-bottom:10px;">
+      {{ user.username }}<br>
+      <span style="font-size:0.75rem;">{{ user.institution_name }}</span>
+    </div>
+    <a href="{% url 'accounts:logout' %}" class="btn-logout">
+      🚪 Logout
+    </a>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+
+  <div class="page-header">
+    <h4>Welcome back, {{ user.username }} 👋</h4>
+    <p>{{ user.institution_name }} | Verifier Account</p>
+  </div>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} mb-3">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- Stats Row -->
+  <div class="row">
+    <div class="col-md-4">
+      <div class="stat-card">
+        <div class="stat-icon">🔍</div>
+        <div class="stat-number">{{ total_verifications }}</div>
+        <div class="stat-label">Total Verifications Performed</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-number">{{ successful_verifications }}</div>
+        <div class="stat-label">Successful Verifications</div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="stat-card">
+        <div class="stat-icon">⚠️</div>
+        <div class="stat-number">{{ failed_verifications }}</div>
+        <div class="stat-label">Failed / Not Found</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Action Card -->
+  <div class="action-card">
+    <h5>Verify a Medical Credential</h5>
+    <p>
+      Enter a UMDPC license number to instantly verify
+      if a practitioner's credential is genuine and active.
+    </p>
+    <a href="{% url 'credentials:verify' %}" class="btn-action">
+      🔍 Verify Now
+    </a>
+  </div>
+
+  <!-- Recent Verifications -->
+  <div class="table-card">
+    <div class="table-title">Recent Verification Activity</div>
+    {% if recent_verifications %}
+    <div class="table-responsive">
+      <table class="table table-hover" style="font-size:0.9rem;">
+        <thead style="background:#f8f9fa;">
+          <tr>
+            <th>License Number Queried</th>
+            <th>Result</th>
+            <th>Date & Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in recent_verifications %}
+          <tr>
+            <td><strong>{{ log.queried_credential_id }}</strong></td>
+            <td>
+              {% if log.result == 'SUCCESS' %}
+                <span class="badge-success">✅ Verified</span>
+              {% elif log.result == 'REVOKED' %}
+                <span class="badge-failed">❌ Revoked</span>
+              {% elif log.result == 'NOT_FOUND' %}
+                <span class="badge-notfound">⚠️ Not Found</span>
+              {% else %}
+                <span class="badge-failed">❌ {{ log.result }}</span>
+              {% endif %}
+            </td>
+            <td style="color:#666;">{{ log.timestamp }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      <div style="text-align:center; padding:30px; color:#999;">
+        No verifications performed yet.
+        <br><br>
+        <a href="{% url 'credentials:verify' %}"
+           style="color:#1F3864; font-weight:bold;">
+          Verify your first credential →
+        </a>
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

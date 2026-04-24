@@ -1,6 +1,282 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard | VerifyDoc Uganda</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background-color: #f0f4f8; font-family: Arial, sans-serif; }
+    .sidebar {
+      position: fixed; top: 0; left: 0;
+      width: 250px; height: 100vh;
+      background: #1F3864; color: white;
+      padding: 30px 20px; z-index: 100;
+    }
+    .sidebar-brand {
+      font-size: 1.2rem; font-weight: bold;
+      color: white; margin-bottom: 8px;
+    }
+    .sidebar-role {
+      font-size: 0.75rem; color: #a0b4d0;
+      margin-bottom: 30px; padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    .sidebar-link {
+      display: block; color: #a0b4d0;
+      text-decoration: none; padding: 10px 15px;
+      border-radius: 8px; margin-bottom: 5px;
+      font-size: 0.9rem; transition: all 0.2s;
+    }
+    .sidebar-link:hover, .sidebar-link.active {
+      background: rgba(255,255,255,0.1); color: white;
+    }
+    .sidebar-link span { margin-right: 10px; }
+    .sidebar-bottom {
+      position: absolute; bottom: 30px; left: 20px; right: 20px;
+    }
+    .btn-logout {
+      display: block; width: 100%;
+      background: rgba(255,255,255,0.1); color: white;
+      border: none; padding: 10px; border-radius: 8px;
+      text-decoration: none; text-align: center; font-size: 0.9rem;
+    }
+    .btn-logout:hover {
+      background: rgba(255,255,255,0.2); color: white;
+    }
+    .main-content { margin-left: 250px; padding: 30px; }
+    .page-header { margin-bottom: 30px; }
+    .page-header h4 { color: #1F3864; font-weight: bold; }
+    .page-header p { color: #666; font-size: 0.9rem; margin: 0; }
+    .stat-card {
+      background: white; border-radius: 12px;
+      padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+      margin-bottom: 20px;
+    }
+    .stat-number {
+      font-size: 2.5rem; font-weight: bold;
+      color: #1F3864; line-height: 1;
+    }
+    .stat-label { color: #666; font-size: 0.85rem; margin-top: 5px; }
+    .stat-icon { font-size: 2rem; float: right; opacity: 0.3; }
+    .table-card {
+      background: white; border-radius: 12px;
+      padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+      margin-bottom: 20px;
+    }
+    .table-title {
+      color: #1F3864; font-weight: bold;
+      font-size: 1rem; margin-bottom: 20px;
+    }
+    .badge-active {
+      background: #d4edda; color: #155724;
+      padding: 4px 10px; border-radius: 20px; font-size: 0.78rem;
+    }
+    .badge-revoked {
+      background: #f8d7da; color: #721c24;
+      padding: 4px 10px; border-radius: 20px; font-size: 0.78rem;
+    }
+    .badge-pending {
+      background: #fff3cd; color: #856404;
+      padding: 4px 10px; border-radius: 20px; font-size: 0.78rem;
+    }
+    .btn-revoke {
+      background: #dc3545; color: white;
+      border: none; padding: 4px 12px;
+      border-radius: 6px; font-size: 0.8rem;
+      text-decoration: none;
+    }
+    .quick-action {
+      background: white; border-radius: 12px;
+      padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+      margin-bottom: 20px; text-align: center;
+    }
+    .quick-action-icon { font-size: 2rem; margin-bottom: 10px; }
+    .quick-action-title {
+      font-weight: bold; color: #1F3864;
+      font-size: 0.95rem; margin-bottom: 5px;
+    }
+    .quick-action-desc {
+      color: #666; font-size: 0.8rem; margin-bottom: 15px;
+    }
+    .btn-quick {
+      background: #1F3864; color: white;
+      border: none; padding: 8px 20px;
+      border-radius: 8px; font-size: 0.85rem;
+      text-decoration: none;
+    }
+    .btn-quick:hover { background: #2E5F8A; color: white; }
+  </style>
+</head>
 <body>
-  <h1>Admin Dashboard - Coming Soon</h1>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="sidebar-brand">VerifyDoc Uganda</div>
+  <div class="sidebar-role">Admin Dashboard</div>
+
+  <a href="{% url 'accounts:dashboard' %}" class="sidebar-link active">
+    <span>🏠</span> Dashboard
+  </a>
+  <a href="{% url 'credentials:all' %}" class="sidebar-link">
+    <span>📋</span> All Credentials
+  </a>
+  <a href="/admin/" class="sidebar-link">
+    <span>⚙️</span> System Admin
+  </a>
+
+  <div class="sidebar-bottom">
+    <div style="color:#a0b4d0; font-size:0.8rem; margin-bottom:10px;">
+      {{ user.username }}<br>
+      <span style="font-size:0.75rem;">System Administrator</span>
+    </div>
+    <a href="{% url 'accounts:logout' %}" class="btn-logout">
+      🚪 Logout
+    </a>
+  </div>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+
+  <div class="page-header">
+    <h4>System Overview 🛡️</h4>
+    <p>VerifyDoc Uganda | Administrator</p>
+  </div>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div class="alert alert-{{ message.tags }} mb-3">{{ message }}</div>
+    {% endfor %}
+  {% endif %}
+
+  <!-- Stats Row -->
+  <div class="row">
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-icon">📄</div>
+        <div class="stat-number">{{ total_credentials }}</div>
+        <div class="stat-label">Total Credentials</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-icon">✅</div>
+        <div class="stat-number">{{ active_credentials }}</div>
+        <div class="stat-label">Active</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-icon">❌</div>
+        <div class="stat-number">{{ revoked_credentials }}</div>
+        <div class="stat-label">Revoked</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="stat-card">
+        <div class="stat-icon">🔍</div>
+        <div class="stat-number">{{ total_verifications }}</div>
+        <div class="stat-label">Total Verifications</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="row">
+    <div class="col-md-4">
+      <div class="quick-action">
+        <div class="quick-action-icon">📋</div>
+        <div class="quick-action-title">Manage Credentials</div>
+        <div class="quick-action-desc">
+          View, monitor and revoke credentials
+        </div>
+        <a href="{% url 'credentials:all' %}" class="btn-quick">
+          View All
+        </a>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="quick-action">
+        <div class="quick-action-icon">👥</div>
+        <div class="quick-action-title">Manage Users</div>
+        <div class="quick-action-desc">
+          Approve accounts and manage roles
+        </div>
+        <a href="/admin/accounts/customuser/" class="btn-quick">
+          Manage Users
+        </a>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="quick-action">
+        <div class="quick-action-icon">📊</div>
+        <div class="quick-action-title">Verification Logs</div>
+        <div class="quick-action-desc">
+          Review all verification activity
+        </div>
+        <a href="/admin/credentials/verificationlog/" class="btn-quick">
+          View Logs
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Credentials -->
+  <div class="table-card">
+    <div class="table-title">Recently Registered Credentials</div>
+    {% if recent_credentials %}
+    <div class="table-responsive">
+      <table class="table table-hover" style="font-size:0.9rem;">
+        <thead style="background:#f8f9fa;">
+          <tr>
+            <th>Practitioner</th>
+            <th>Qualification</th>
+            <th>License No.</th>
+            <th>Issued By</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for credential in recent_credentials %}
+          <tr>
+            <td><strong>{{ credential.practitioner_name }}</strong></td>
+            <td>{{ credential.qualification }}</td>
+            <td>{{ credential.license_number }}</td>
+            <td>{{ credential.issued_by.institution_name }}</td>
+            <td>
+              {% if credential.status == 'ACTIVE' %}
+                <span class="badge-active">Active</span>
+              {% elif credential.status == 'REVOKED' %}
+                <span class="badge-revoked">Revoked</span>
+              {% else %}
+                <span class="badge-pending">{{ credential.status }}</span>
+              {% endif %}
+            </td>
+            <td>
+              {% if credential.status == 'ACTIVE' %}
+                <a href="{% url 'credentials:revoke' credential.credential_id %}"
+                   class="btn-revoke">
+                  Revoke
+                </a>
+              {% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+      <div style="text-align:center; padding:30px; color:#999;">
+        No credentials in the system yet.
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
