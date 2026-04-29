@@ -22,7 +22,6 @@ logger = logging.getLogger(__name__)
 
 @login_required
 def issue_credential_view(request):
-    # Only issuers can access this view
     if request.user.role != Role.ISSUER and not request.user.is_superuser:
         messages.error(request, 'You do not have permission to issue credentials.')
         return redirect('accounts:dashboard')
@@ -33,25 +32,48 @@ def issue_credential_view(request):
         form = CredentialRegistrationForm(request.POST, request.FILES)
         if form.is_valid():
             try:
-                # Save credential to database but don't commit yet
+                # Save to database first
                 credential = form.save(commit=False)
                 credential.issued_by = request.user
                 credential.status = CredentialStatus.ACTIVE
-
-                # Save to database first
                 credential.save()
 
-                # Log success
-                logger.info(
-                    f"Credential registered: {credential.credential_id} "
-                    f"by {request.user.username}"
+                # Now record on blockchain
+                from blockchain.utils import issue_credential_on_chain
+                from django.utils import timezone
+
+                blockchain_result = issue_credential_on_chain(
+                    license_number=credential.license_number,
+                    practitioner_name=credential.practitioner_name,
+                    practitioner_id=credential.practitioner_id,
+                    qualification=credential.qualification,
+                    ipfs_document_hash=credential.ipfs_document_hash or '',
+                    ipfs_photo_hash=credential.ipfs_photo_hash or '',
                 )
+
+                if blockchain_result['success']:
+                    # Save blockchain details to database
+                    credential.blockchain_tx_hash = blockchain_result['tx_hash']
+                    credential.blockchain_recorded_at = timezone.now()
+                    credential.save()
+                    logger.info(
+                        f"Credential recorded on blockchain: "
+                        f"{credential.license_number}"
+                    )
+                else:
+                    logger.warning(
+                        f"Blockchain recording failed for "
+                        f"{credential.license_number}: "
+                        f"{blockchain_result.get('error')}"
+                    )
 
                 messages.success(
                     request,
                     f'Credential for {credential.practitioner_name} '
-                    f'registered successfully. '
-                    f'Blockchain recording is being processed.'
+                    f'registered successfully.'
+                    + (' Recorded on blockchain.' 
+                       if blockchain_result['success'] 
+                       else ' Note: Blockchain recording pending.')
                 )
                 return redirect('credentials:all')
 
@@ -59,8 +81,7 @@ def issue_credential_view(request):
                 logger.error(f"Credential registration error: {str(e)}")
                 messages.error(
                     request,
-                    'An error occurred while registering the credential. '
-                    'Please try again.'
+                    'An error occurred. Please try again.'
                 )
 
     return render(request, 'issuer/register_credential.html', {
@@ -155,30 +176,38 @@ def verify_credential_view(request):
 
 @login_required
 def revoke_credential_view(request, credential_id):
-    # Only admins can revoke credentials
     if request.user.role != Role.ADMIN and not request.user.is_superuser:
-        messages.error(
-            request,
-            'You do not have permission to revoke credentials.'
-        )
+        messages.error(request, 'You do not have permission to revoke credentials.')
         return redirect('accounts:dashboard')
 
     credential = get_object_or_404(Credential, credential_id=credential_id)
 
     if request.method == 'POST':
+        # Revoke on blockchain first
+        from blockchain.utils import revoke_credential_on_chain
+
+        blockchain_result = revoke_credential_on_chain(
+            credential.license_number
+        )
+
+        # Revoke in database regardless of blockchain result
         credential.status = CredentialStatus.REVOKED
         credential.save()
 
-        logger.info(
-            f"Credential revoked: {credential.credential_id} "
-            f"by {request.user.username}"
-        )
+        if blockchain_result['success']:
+            messages.success(
+                request,
+                f'Credential for {credential.practitioner_name} '
+                f'revoked successfully on blockchain.'
+            )
+        else:
+            messages.warning(
+                request,
+                f'Credential revoked in system. '
+                f'Blockchain revocation pending: '
+                f'{blockchain_result.get("error", "Unknown error")}'
+            )
 
-        messages.success(
-            request,
-            f'Credential for {credential.practitioner_name} '
-            f'has been revoked successfully.'
-        )
         return redirect('credentials:all')
 
     return render(request, 'admin/revoke_credential.html', {
