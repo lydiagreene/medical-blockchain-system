@@ -28,7 +28,7 @@ class CredentialRegistrationForm(forms.ModelForm):
 
     # Practitioner photo for biometric verification
     practitioner_photo = forms.ImageField(
-        required=True,
+        required=False,
         widget=forms.FileInput(attrs={
             'class': 'form-control',
             'accept': '.jpg,.jpeg,.png',

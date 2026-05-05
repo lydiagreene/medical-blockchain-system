@@ -8,6 +8,7 @@
 # Virtual environment
 venv/
 env/
+venv311/
 
 # Django
 *.pyc

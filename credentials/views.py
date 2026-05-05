@@ -23,7 +23,10 @@ logger = logging.getLogger(__name__)
 @login_required
 def issue_credential_view(request):
     if request.user.role != Role.ISSUER and not request.user.is_superuser:
-        messages.error(request, 'You do not have permission to issue credentials.')
+        messages.error(
+            request,
+            'You do not have permission to issue credentials.'
+        )
         return redirect('accounts:dashboard')
 
     form = CredentialRegistrationForm()
@@ -38,42 +41,110 @@ def issue_credential_view(request):
                 credential.status = CredentialStatus.ACTIVE
                 credential.save()
 
-                # Now record on blockchain
+                # ── Step 1: Upload document to IPFS ──
+                from ipfs.pinata_utils import (
+                    upload_document_to_ipfs,
+                    upload_photo_to_ipfs
+                )
+
+                document_file = request.FILES.get('credential_document')
+                photo_file = request.FILES.get('practitioner_photo')
+
+                # If no uploaded photo check for webcam capture
+                if not photo_file:
+                    webcam_photo_data = request.POST.get('webcam_photo_data')
+                    if webcam_photo_data:
+                        # Convert base64 webcam image to a file-like object
+                        import base64
+                        import io
+                        from django.core.files.uploadedfile import InMemoryUploadedFile
+
+                        try:
+                            if ',' in webcam_photo_data:
+                                webcam_photo_data = webcam_photo_data.split(',')[1]
+                            image_bytes = base64.b64decode(webcam_photo_data)
+                            photo_file = InMemoryUploadedFile(
+                                file=io.BytesIO(image_bytes),
+                                field_name='practitioner_photo',
+                                name=f"webcam_{credential.practitioner_name.replace(' ', '_')}.jpg",
+                                content_type='image/jpeg',
+                                size=len(image_bytes),
+                                charset=None,
+                            )
+                            logger.info("Webcam photo captured for registration")
+                        except Exception as e:
+                            logger.warning(f"Webcam photo processing error: {str(e)}")
+
+                ipfs_document_hash = ''
+                ipfs_photo_hash = ''
+
+                if document_file:
+                    doc_result = upload_document_to_ipfs(
+                        document_file,
+                        credential.practitioner_name
+                    )
+                    if doc_result['success']:
+                        ipfs_document_hash = doc_result['ipfs_hash']
+                        credential.ipfs_document_hash = ipfs_document_hash
+                        logger.info(
+                            f"Document uploaded to IPFS: {ipfs_document_hash}"
+                        )
+                    else:
+                        logger.warning(
+                            f"Document IPFS upload failed: "
+                            f"{doc_result.get('error')}"
+                        )
+
+                if photo_file:
+                    photo_result = upload_photo_to_ipfs(
+                        photo_file,
+                        credential.practitioner_name
+                    )
+                    if photo_result['success']:
+                        ipfs_photo_hash = photo_result['ipfs_hash']
+                        credential.ipfs_photo_hash = ipfs_photo_hash
+                        logger.info(
+                            f"Photo uploaded to IPFS: {ipfs_photo_hash}"
+                        )
+                    else:
+                        logger.warning(
+                            f"Photo IPFS upload failed: "
+                            f"{photo_result.get('error')}"
+                        )
+
+                # Save IPFS hashes to database
+                credential.save()
+
+                # ── Step 2: Record on blockchain ──
                 from blockchain.utils import issue_credential_on_chain
-                from django.utils import timezone
 
                 blockchain_result = issue_credential_on_chain(
                     license_number=credential.license_number,
                     practitioner_name=credential.practitioner_name,
                     practitioner_id=credential.practitioner_id,
                     qualification=credential.qualification,
-                    ipfs_document_hash=credential.ipfs_document_hash or '',
-                    ipfs_photo_hash=credential.ipfs_photo_hash or '',
+                    ipfs_document_hash=ipfs_document_hash,
+                    ipfs_photo_hash=ipfs_photo_hash,
                 )
 
                 if blockchain_result['success']:
-                    # Save blockchain details to database
-                    credential.blockchain_tx_hash = blockchain_result['tx_hash']
+                    credential.blockchain_tx_hash = (
+                        blockchain_result['tx_hash']
+                    )
                     credential.blockchain_recorded_at = timezone.now()
                     credential.save()
                     logger.info(
                         f"Credential recorded on blockchain: "
                         f"{credential.license_number}"
                     )
-                else:
-                    logger.warning(
-                        f"Blockchain recording failed for "
-                        f"{credential.license_number}: "
-                        f"{blockchain_result.get('error')}"
-                    )
 
                 messages.success(
                     request,
                     f'Credential for {credential.practitioner_name} '
-                    f'registered successfully.'
-                    + (' Recorded on blockchain.' 
-                       if blockchain_result['success'] 
-                       else ' Note: Blockchain recording pending.')
+                    f'registered successfully. '
+                    + ('✅ Recorded on blockchain.'
+                       if blockchain_result['success']
+                       else '⚠️ Blockchain recording pending.')
                 )
                 return redirect('credentials:all')
 
@@ -96,7 +167,6 @@ def issue_credential_view(request):
 
 @login_required
 def verify_credential_view(request):
-    # Only verifiers can access this view
     if request.user.role != Role.VERIFIER and not request.user.is_superuser:
         messages.error(
             request,
@@ -111,14 +181,28 @@ def verify_credential_view(request):
         form = CredentialVerificationForm(request.POST)
         if form.is_valid():
             license_number = form.cleaned_data['license_number']
+            credential = None
 
             try:
-                # Look up the credential
+                # ── Step 1: Look up in Django database ──
                 credential = Credential.objects.get(
                     license_number=license_number
                 )
 
-                # Check if credential is active
+                # ── Step 2: Verify on blockchain ──
+                from blockchain.utils import verify_credential_on_chain
+
+                blockchain_result = verify_credential_on_chain(
+                    license_number
+                )
+
+                blockchain_verified = (
+                    blockchain_result['success'] and
+                    blockchain_result.get('exists', False) and
+                    blockchain_result.get('is_active', False)
+                )
+
+                # ── Step 3: Check credential status ──
                 if credential.status == CredentialStatus.REVOKED:
                     result = 'REVOKED'
                     verification_result = {
@@ -139,6 +223,7 @@ def verify_credential_view(request):
                         'status': 'success',
                         'message': 'Credential verified successfully.',
                         'credential': credential,
+                        'blockchain_verified': blockchain_verified,
                     }
 
             except Credential.DoesNotExist:
@@ -151,17 +236,34 @@ def verify_credential_view(request):
                         'or the license number may be incorrect.'
                     ),
                 }
+                blockchain_verified = False
 
-            # Log this verification attempt
-            VerificationLog.objects.create(
-                credential=credential if 'credential' in locals() else None,
+            # ── Step 4: Log verification attempt ──
+            log = VerificationLog.objects.create(
+                credential=credential,
                 queried_credential_id=license_number,
                 verified_by=request.user,
                 result=result,
-                blockchain_verified=False,
+                blockchain_verified=blockchain_verified
+                if 'blockchain_verified' in locals() else False,
                 ip_address=request.META.get('REMOTE_ADDR'),
                 user_agent=request.META.get('HTTP_USER_AGENT', ''),
             )
+
+            # ── Step 5: Run AI fraud detection ──
+            from fraud_detection.predict import predict_fraud
+
+            fraud_result = predict_fraud(log)
+            log.flagged_as_suspicious = fraud_result['is_suspicious']
+            log.fraud_score = fraud_result['fraud_score']
+            log.save()
+
+            if fraud_result['is_suspicious']:
+                logger.warning(
+                    f"Suspicious verification flagged: "
+                    f"{license_number} | "
+                    f"score={fraud_result['fraud_score']}"
+                )
 
     return render(request, 'verifier/verify_credential.html', {
         'form': form,
@@ -177,10 +279,16 @@ def verify_credential_view(request):
 @login_required
 def revoke_credential_view(request, credential_id):
     if request.user.role != Role.ADMIN and not request.user.is_superuser:
-        messages.error(request, 'You do not have permission to revoke credentials.')
+        messages.error(
+            request,
+            'You do not have permission to revoke credentials.'
+        )
         return redirect('accounts:dashboard')
 
-    credential = get_object_or_404(Credential, credential_id=credential_id)
+    credential = get_object_or_404(
+        Credential,
+        credential_id=credential_id
+    )
 
     if request.method == 'POST':
         # Revoke on blockchain first
@@ -198,7 +306,7 @@ def revoke_credential_view(request, credential_id):
             messages.success(
                 request,
                 f'Credential for {credential.practitioner_name} '
-                f'revoked successfully on blockchain.'
+                f'revoked successfully on blockchain and system.'
             )
         else:
             messages.warning(
@@ -234,7 +342,10 @@ def all_credentials_view(request):
 
     # Verifiers should not access this page
     else:
-        messages.error(request, 'You do not have permission to view this page.')
+        messages.error(
+            request,
+            'You do not have permission to view this page.'
+        )
         return redirect('accounts:dashboard')
 
     return render(request, 'admin/all_credentials.html', {
