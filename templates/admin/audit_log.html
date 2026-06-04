@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% block title %}Audit Log — VerifyDoc Uganda{% endblock %}
+
+{% block content %}
+<div class="page-header mb-24">
+  <div>
+    <h1 class="page-title">Audit Log</h1>
+    <p class="page-sub">Immutable record of all system actions — {{ total }} entr{{ total|pluralize:"y,ies" }}</p>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-20">
+  <div class="card-body" style="padding: 16px 20px;">
+    <form method="get" style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;">
+      <div>
+        <label class="form-label" style="margin-bottom:4px;">Action</label>
+        <select name="action" class="form-control" style="min-width:200px;">
+          <option value="">All actions</option>
+          {% for val, label in action_choices %}
+            <option value="{{ val }}" {% if val == action_filter %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label class="form-label" style="margin-bottom:4px;">Actor (username)</label>
+        <input type="text" name="actor" class="form-control" value="{{ actor_filter }}" placeholder="Search username…" style="width:170px;">
+      </div>
+      <div>
+        <label class="form-label" style="margin-bottom:4px;">From</label>
+        <input type="date" name="date_from" class="form-control" value="{{ date_from }}">
+      </div>
+      <div>
+        <label class="form-label" style="margin-bottom:4px;">To</label>
+        <input type="date" name="date_to" class="form-control" value="{{ date_to }}">
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button type="submit" class="btn btn-primary">Filter</button>
+        <a href="{% url 'accounts:audit_log' %}" class="btn btn-secondary">Clear</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Table -->
+<div class="card">
+  <div class="card-body" style="padding:0;">
+    {% if page_obj %}
+    <div style="overflow-x:auto;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Actor</th>
+            <th>Action</th>
+            <th>Target</th>
+            <th>Notes</th>
+            <th>IP</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for entry in page_obj %}
+          <tr>
+            <td style="white-space:nowrap;font-size:12px;color:var(--muted);">
+              {{ entry.timestamp|date:"d M Y" }}<br>
+              <span style="font-size:11px;">{{ entry.timestamp|time:"H:i:s" }}</span>
+            </td>
+            <td>
+              {% if entry.actor %}
+                <span style="font-weight:600;">{{ entry.actor.username }}</span>
+                <div style="font-size:11px;color:var(--muted);">{{ entry.actor.get_role_display }}</div>
+              {% else %}
+                <span style="color:var(--muted);">system</span>
+              {% endif %}
+            </td>
+            <td>
+              <span class="badge
+                {% if 'ISSUED' in entry.action or 'APPROVED' in entry.action %}badge-active
+                {% elif 'REVOKED' in entry.action or 'REJECTED' in entry.action %}badge-revoked
+                {% elif 'RENEWED' in entry.action %}badge-pending
+                {% else %}badge-expired
+                {% endif %}
+              ">{{ entry.get_action_display }}</span>
+            </td>
+            <td style="max-width:220px;">
+              <div style="font-size:12px;font-weight:600;color:var(--text);word-break:break-word;">{{ entry.target_description|truncatechars:60 }}</div>
+              {% if entry.target_type %}
+                <div style="font-size:11px;color:var(--muted);">{{ entry.target_type }}</div>
+              {% endif %}
+            </td>
+            <td style="max-width:160px;font-size:12px;color:var(--muted);">{{ entry.notes|truncatechars:80|default:"—" }}</td>
+            <td style="font-size:11px;color:var(--muted);font-family:monospace;">{{ entry.ip_address|default:"—" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-top:1px solid var(--border);">
+      <span style="font-size:13px;color:var(--muted);">
+        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+      </span>
+      <div style="display:flex;gap:6px;">
+        {% if page_obj.has_previous %}
+          <a href="?page={{ page_obj.previous_page_number }}&action={{ action_filter }}&actor={{ actor_filter }}&date_from={{ date_from }}&date_to={{ date_to }}" class="btn btn-secondary" style="padding:6px 12px;font-size:13px;">&larr; Prev</a>
+        {% endif %}
+        {% if page_obj.has_next %}
+          <a href="?page={{ page_obj.next_page_number }}&action={{ action_filter }}&actor={{ actor_filter }}&date_from={{ date_from }}&date_to={{ date_to }}" class="btn btn-secondary" style="padding:6px 12px;font-size:13px;">Next &rarr;</a>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div style="text-align:center;padding:60px 20px;color:var(--muted);">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="40" height="40" style="display:block;margin:0 auto 12px;opacity:.3"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12h16.5m-16.5 3.75h16.5M3.75 19.5h16.5M5.625 4.5h12.75a1.875 1.875 0 010 3.75H5.625a1.875 1.875 0 010-3.75z"/></svg>
+      No audit log entries match your filters.
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

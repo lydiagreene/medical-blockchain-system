@@ -160,3 +160,56 @@ class CredentialVerificationForm(forms.Form):
         if license_number:
             return license_number.strip().upper()
         return license_number
+
+
+# ───────────────────────────────────────────
+# CREDENTIAL RENEWAL FORM
+# ───────────────────────────────────────────
+
+class CredentialRenewalForm(forms.Form):
+    """
+    Form used by issuers to renew an existing credential.
+    Only the new expiry date and an optional updated document are required.
+    """
+
+    new_expiry_date = forms.DateField(
+        label='New License Expiry Date',
+        widget=forms.DateInput(attrs={
+            'class': 'form-control',
+            'type': 'date',
+        }),
+        help_text='The updated expiry date for this practicing license.'
+    )
+
+    updated_document = forms.FileField(
+        required=False,
+        label='Updated Credential Document (optional)',
+        widget=forms.FileInput(attrs={
+            'class': 'form-control',
+            'accept': '.pdf,.jpg,.jpeg,.png',
+        }),
+        help_text='Upload a new version of the credential document if available.'
+    )
+
+    renewal_notes = forms.CharField(
+        required=False,
+        max_length=500,
+        label='Renewal Notes (optional)',
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 3,
+            'placeholder': 'e.g. Annual renewal, CPD requirements met, new specialty added...',
+        }),
+    )
+
+    def clean_new_expiry_date(self):
+        expiry = self.cleaned_data.get('new_expiry_date')
+        if expiry and expiry <= timezone.now().date():
+            raise forms.ValidationError('New expiry date must be in the future.')
+        return expiry
+
+    def clean_updated_document(self):
+        doc = self.cleaned_data.get('updated_document')
+        if doc and doc.size > 10 * 1024 * 1024:
+            raise forms.ValidationError('Document size must be under 10MB.')
+        return doc

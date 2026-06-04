@@ -1,0 +1,24 @@
+VerifyDoc Uganda — License Expiry Warning
+==========================================
+
+Hello {{ recipient_name }},
+
+{% if days_left == 1 %}URGENT: The following credential expires TOMORROW.
+{% else %}The following credential will expire in {{ days_left }} day{{ days_left|pluralize }}.
+{% endif %}
+EXPIRING LICENSE DETAILS
+-------------------------
+Practitioner  : {{ credential.practitioner_name }}
+License Number: {{ credential.license_number }}
+Qualification : {{ credential.qualification }}
+Institution   : {{ credential.institution_of_study }}
+Expiry Date   : {{ credential.license_expiry_date|date:"d F Y" }}
+Days Remaining: {{ days_left }}
+
+View the credential:
+{{ credential_url }}
+
+Once expired, this credential will no longer pass verification checks.
+Please ensure the practitioner renews their license before the expiry date.
+
+— VerifyDoc Uganda System

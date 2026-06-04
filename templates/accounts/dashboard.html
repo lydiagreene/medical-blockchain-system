@@ -1,6 +1,16 @@
-<!DOCTYPE html>
-<html>
-<body>
-  <h1>Dashboard - Coming Soon</h1>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block title %}Dashboard | VerifyDoc Uganda{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Dashboard</div>
+    <div class="page-subtitle">Welcome back, {{ user.username }}</div>
+  </div>
+</div>
+<div class="card card-body" style="text-align:center; padding:48px 24px;">
+  <p class="text-muted">Your account role has not been configured. Please contact an administrator.</p>
+  <a href="{% url 'accounts:logout' %}" class="btn btn-secondary" style="margin-top:16px;">Sign Out</a>
+</div>
+{% endblock %}

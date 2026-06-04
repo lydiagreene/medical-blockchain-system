@@ -32,7 +32,7 @@ def predict_fraud(verification_log):
             prediction = model.predict(features)
 
             # Isolation Forest returns -1 for anomalies, 1 for normal
-            is_suspicious = prediction[0] == -1
+            is_suspicious = bool(prediction[0] == -1)
 
             # Get anomaly score
             score = model.decision_function(features)[0]

@@ -102,6 +102,13 @@ class Credential(models.Model):
         default=CredentialStatus.ACTIVE,
     )
 
+    revocation_reason = models.CharField(
+        max_length=500,
+        blank=True,
+        null=True,
+        help_text="Reason provided when the credential was revoked"
+    )
+
     # ── Blockchain Details ──
     # These are filled in after the credential
     # is recorded on the blockchain
@@ -152,6 +159,19 @@ class Credential(models.Model):
         null=True,
         blank=True,
         help_text="The institution that issued this credential"
+    )
+
+    # ── Renewal tracking ──
+
+    renewal_count = models.IntegerField(
+        default=0,
+        help_text="Number of times this credential has been renewed"
+    )
+
+    last_renewed_at = models.DateTimeField(
+        null=True,
+        blank=True,
+        help_text="Timestamp of the most recent renewal"
     )
 
     # ── Timestamps ──

@@ -1,282 +1,326 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Dashboard | VerifyDoc Uganda</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background-color: #f0f4f8; font-family: Arial, sans-serif; }
-    .sidebar {
-      position: fixed; top: 0; left: 0;
-      width: 250px; height: 100vh;
-      background: #1F3864; color: white;
-      padding: 30px 20px; z-index: 100;
-    }
-    .sidebar-brand {
-      font-size: 1.2rem; font-weight: bold;
-      color: white; margin-bottom: 8px;
-    }
-    .sidebar-role {
-      font-size: 0.75rem; color: #a0b4d0;
-      margin-bottom: 30px; padding-bottom: 20px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-    .sidebar-link {
-      display: block; color: #a0b4d0;
-      text-decoration: none; padding: 10px 15px;
-      border-radius: 8px; margin-bottom: 5px;
-      font-size: 0.9rem; transition: all 0.2s;
-    }
-    .sidebar-link:hover, .sidebar-link.active {
-      background: rgba(255,255,255,0.1); color: white;
-    }
-    .sidebar-link span { margin-right: 10px; }
-    .sidebar-bottom {
-      position: absolute; bottom: 30px; left: 20px; right: 20px;
-    }
-    .btn-logout {
-      display: block; width: 100%;
-      background: rgba(255,255,255,0.1); color: white;
-      border: none; padding: 10px; border-radius: 8px;
-      text-decoration: none; text-align: center; font-size: 0.9rem;
-    }
-    .btn-logout:hover {
-      background: rgba(255,255,255,0.2); color: white;
-    }
-    .main-content { margin-left: 250px; padding: 30px; }
-    .page-header { margin-bottom: 30px; }
-    .page-header h4 { color: #1F3864; font-weight: bold; }
-    .page-header p { color: #666; font-size: 0.9rem; margin: 0; }
-    .stat-card {
-      background: white; border-radius: 12px;
-      padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-      margin-bottom: 20px;
-    }
-    .stat-number {
-      font-size: 2.5rem; font-weight: bold;
-      color: #1F3864; line-height: 1;
-    }
-    .stat-label { color: #666; font-size: 0.85rem; margin-top: 5px; }
-    .stat-icon { font-size: 2rem; float: right; opacity: 0.3; }
-    .table-card {
-      background: white; border-radius: 12px;
-      padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-      margin-bottom: 20px;
-    }
-    .table-title {
-      color: #1F3864; font-weight: bold;
-      font-size: 1rem; margin-bottom: 20px;
-    }
-    .badge-active {
-      background: #d4edda; color: #155724;
-      padding: 4px 10px; border-radius: 20px; font-size: 0.78rem;
-    }
-    .badge-revoked {
-      background: #f8d7da; color: #721c24;
-      padding: 4px 10px; border-radius: 20px; font-size: 0.78rem;
-    }
-    .badge-pending {
-      background: #fff3cd; color: #856404;
-      padding: 4px 10px; border-radius: 20px; font-size: 0.78rem;
-    }
-    .btn-revoke {
-      background: #dc3545; color: white;
-      border: none; padding: 4px 12px;
-      border-radius: 6px; font-size: 0.8rem;
-      text-decoration: none;
-    }
-    .quick-action {
-      background: white; border-radius: 12px;
-      padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-      margin-bottom: 20px; text-align: center;
-    }
-    .quick-action-icon { font-size: 2rem; margin-bottom: 10px; }
-    .quick-action-title {
-      font-weight: bold; color: #1F3864;
-      font-size: 0.95rem; margin-bottom: 5px;
-    }
-    .quick-action-desc {
-      color: #666; font-size: 0.8rem; margin-bottom: 15px;
-    }
-    .btn-quick {
-      background: #1F3864; color: white;
-      border: none; padding: 8px 20px;
-      border-radius: 8px; font-size: 0.85rem;
-      text-decoration: none;
-    }
-    .btn-quick:hover { background: #2E5F8A; color: white; }
-  </style>
-</head>
-<body>
+{% extends 'base.html' %}
 
-<!-- Sidebar -->
-<div class="sidebar">
-  <div class="sidebar-brand">VerifyDoc Uganda</div>
-  <div class="sidebar-role">Admin Dashboard</div>
+{% block title %}Admin Dashboard | VerifyDoc Uganda{% endblock %}
 
-  <a href="{% url 'accounts:dashboard' %}" class="sidebar-link active">
-    <span>🏠</span> Dashboard
-  </a>
-  <a href="{% url 'credentials:all' %}" class="sidebar-link">
-    <span>📋</span> All Credentials
-  </a>
-  <a href="/admin/" class="sidebar-link">
-    <span>⚙️</span> System Admin
-  </a>
-
-  <div class="sidebar-bottom">
-    <div style="color:#a0b4d0; font-size:0.8rem; margin-bottom:10px;">
-      {{ user.username }}<br>
-      <span style="font-size:0.75rem;">System Administrator</span>
-    </div>
-    <a href="{% url 'accounts:logout' %}" class="btn-logout">
-      🚪 Logout
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">System Overview</div>
+    <div class="page-subtitle">VerifyDoc Uganda &mdash; Administrator</div>
+  </div>
+  <div style="display:flex;gap:8px;">
+    {% if pending_users_count %}
+    <a href="{% url 'accounts:pending_users' %}" class="btn btn-warning">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="14" height="14"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><polyline points="23 11 17 11"/><line x1="20" y1="8" x2="20" y2="14"/></svg>
+      {{ pending_users_count }} Pending
+    </a>
+    {% endif %}
+    <a href="{% url 'credentials:all' %}" class="btn btn-primary">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="14" height="14"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      All Credentials
     </a>
   </div>
 </div>
 
-<!-- Main Content -->
-<div class="main-content">
-
-  <div class="page-header">
-    <h4>System Overview 🛡️</h4>
-    <p>VerifyDoc Uganda | Administrator</p>
+<!-- Pending approvals alert banner -->
+{% if pending_users_count %}
+<div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:var(--radius);padding:14px 20px;margin-bottom:24px;display:flex;align-items:center;gap:14px;">
+  <div style="background:#D97706;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#fff" width="18" height="18"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
   </div>
-
-  {% if messages %}
-    {% for message in messages %}
-      <div class="alert alert-{{ message.tags }} mb-3">{{ message }}</div>
-    {% endfor %}
-  {% endif %}
-
-  <!-- Stats Row -->
-  <div class="row">
-    <div class="col-md-3">
-      <div class="stat-card">
-        <div class="stat-icon">📄</div>
-        <div class="stat-number">{{ total_credentials }}</div>
-        <div class="stat-label">Total Credentials</div>
-      </div>
+  <div style="flex:1;">
+    <div style="font-size:14px;font-weight:600;color:#92400E;">
+      {{ pending_users_count }} account{{ pending_users_count|pluralize }} waiting for approval
     </div>
-    <div class="col-md-3">
-      <div class="stat-card">
-        <div class="stat-icon">✅</div>
-        <div class="stat-number">{{ active_credentials }}</div>
-        <div class="stat-label">Active</div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="stat-card">
-        <div class="stat-icon">❌</div>
-        <div class="stat-number">{{ revoked_credentials }}</div>
-        <div class="stat-label">Revoked</div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="stat-card">
-        <div class="stat-icon">🔍</div>
-        <div class="stat-number">{{ total_verifications }}</div>
-        <div class="stat-label">Total Verifications</div>
-      </div>
+    <div style="font-size:13px;color:#B45309;margin-top:2px;">
+      New users cannot log in until their accounts are reviewed.
     </div>
   </div>
+  <a href="{% url 'accounts:pending_users' %}" class="btn btn-warning btn-sm">Review Now</a>
+</div>
+{% endif %}
 
-  <!-- Quick Actions -->
-  <div class="row">
-    <div class="col-md-4">
-      <div class="quick-action">
-        <div class="quick-action-icon">📋</div>
-        <div class="quick-action-title">Manage Credentials</div>
-        <div class="quick-action-desc">
-          View, monitor and revoke credentials
+<!-- Fraud alert card (shown only when there are today's flags) -->
+{% if today_fraud_flags %}
+<div style="background:#FEF2F2;border:1px solid #FECACA;border-radius:var(--radius);padding:14px 20px;margin-bottom:24px;display:flex;align-items:center;gap:14px;">
+  <div style="background:#DC2626;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#fff" width="18" height="18"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+  </div>
+  <div style="flex:1;">
+    <div style="font-size:14px;font-weight:600;color:#991B1B;">
+      {{ today_fraud_flags }} suspicious verification{{ today_fraud_flags|pluralize }} flagged today
+    </div>
+    <div style="font-size:13px;color:#B91C1C;margin-top:2px;">
+      The AI fraud detection system has identified unusual activity.
+    </div>
+  </div>
+  <a href="{% url 'fraud:dashboard' %}" class="btn btn-danger btn-sm">Review Activity</a>
+</div>
+{% endif %}
+
+<!-- Stats -->
+<div class="grid-4 mb-24">
+  <div class="stat-card">
+    <div class="stat-top-bar"></div>
+    <div class="stat-icon-wrap">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+    </div>
+    <div class="stat-value">{{ total_credentials }}</div>
+    <div class="stat-label">Total Credentials</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-top-bar green"></div>
+    <div class="stat-icon-wrap green">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div class="stat-value">{{ active_credentials }}</div>
+    <div class="stat-label">Active</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-top-bar red"></div>
+    <div class="stat-icon-wrap red">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+    </div>
+    <div class="stat-value">{{ revoked_credentials }}</div>
+    <div class="stat-label">Revoked</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-top-bar cyan"></div>
+    <div class="stat-icon-wrap cyan">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    </div>
+    <div class="stat-value">{{ total_verifications }}</div>
+    <div class="stat-label">Verifications</div>
+  </div>
+</div>
+
+<!-- Pending approvals stat (only shown when there are pending users) -->
+{% if pending_users_count %}
+<div class="mb-24">
+  <a href="{% url 'accounts:pending_users' %}" style="text-decoration:none;">
+    <div class="stat-card" style="border:1px solid #FDE68A;cursor:pointer;">
+      <div class="stat-top-bar amber"></div>
+      <div style="display:flex;align-items:center;gap:16px;">
+        <div class="stat-icon-wrap amber">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
         </div>
-        <a href="{% url 'credentials:all' %}" class="btn-quick">
-          View All
-        </a>
+        <div>
+          <div class="stat-value">{{ pending_users_count }}</div>
+          <div class="stat-label">Pending Approvals &rarr;</div>
+        </div>
       </div>
     </div>
-    <div class="col-md-4">
-      <div class="quick-action">
-        <div class="quick-action-icon">👥</div>
-        <div class="quick-action-title">Manage Users</div>
-        <div class="quick-action-desc">
-          Approve accounts and manage roles
-        </div>
-        <a href="/admin/accounts/customuser/" class="btn-quick">
-          Manage Users
-        </a>
-      </div>
+  </a>
+</div>
+{% endif %}
+
+<!-- Quick Actions -->
+<div class="grid-4 mb-24">
+  <div class="card card-body" style="text-align:center; padding:28px 24px;">
+    <div class="stat-icon-wrap" style="margin:0 auto 14px;">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
     </div>
-    <div class="col-md-4">
-      <div class="quick-action">
-        <div class="quick-action-icon">📊</div>
-        <div class="quick-action-title">Verification Logs</div>
-        <div class="quick-action-desc">
-          Review all verification activity
-        </div>
-        <a href="/admin/credentials/verificationlog/" class="btn-quick">
-          View Logs
-        </a>
-      </div>
+    <div class="fw-700 mb-4" style="font-size:14px;">Manage Credentials</div>
+    <div class="text-muted text-sm mb-16">View, monitor, and revoke credentials</div>
+    <a href="{% url 'credentials:all' %}" class="btn btn-primary btn-sm">View All</a>
+  </div>
+  <div class="card card-body" style="text-align:center; padding:28px 24px;">
+    <div class="stat-icon-wrap" style="margin:0 auto 14px;">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+    </div>
+    <div class="fw-700 mb-4" style="font-size:14px;">Manage Users</div>
+    <div class="text-muted text-sm mb-16">Approve accounts and manage roles</div>
+    <a href="{% url 'accounts:pending_users' %}" class="btn btn-warning btn-sm">
+      Pending Approvals{% if pending_users_count %} ({{ pending_users_count }}){% endif %}
+    </a>
+  </div>
+  <div class="card card-body" style="text-align:center; padding:28px 24px;">
+    <div class="stat-icon-wrap cyan" style="margin:0 auto 14px;">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    </div>
+    <div class="fw-700 mb-4" style="font-size:14px;">Verification Logs</div>
+    <div class="text-muted text-sm mb-16">Review all verification activity</div>
+    <a href="/admin/credentials/verificationlog/" class="btn btn-secondary btn-sm">View Logs</a>
+  </div>
+  <div class="card card-body" style="text-align:center; padding:28px 24px;">
+    <div class="stat-icon-wrap red" style="margin:0 auto 14px;">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    </div>
+    <div class="fw-700 mb-4" style="font-size:14px;">Fraud Detection</div>
+    <div class="text-muted text-sm mb-16">AI-flagged suspicious activity</div>
+    <a href="{% url 'fraud:dashboard' %}" class="btn btn-danger btn-sm">View Dashboard</a>
+  </div>
+</div>
+
+<!-- Charts -->
+<div class="two-col-sidebar-md">
+
+  <!-- Verifications line chart -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Verifications — last 30 days</span>
+    </div>
+    <div class="card-body" style="padding-top:12px;">
+      <canvas id="verifChart" height="120"></canvas>
     </div>
   </div>
 
-  <!-- Recent Credentials -->
-  <div class="table-card">
-    <div class="table-title">Recently Registered Credentials</div>
-    {% if recent_credentials %}
-    <div class="table-responsive">
-      <table class="table table-hover" style="font-size:0.9rem;">
-        <thead style="background:#f8f9fa;">
-          <tr>
-            <th>Practitioner</th>
-            <th>Qualification</th>
-            <th>License No.</th>
-            <th>Issued By</th>
-            <th>Status</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for credential in recent_credentials %}
-          <tr>
-            <td><strong>{{ credential.practitioner_name }}</strong></td>
-            <td>{{ credential.qualification }}</td>
-            <td>{{ credential.license_number }}</td>
-            <td>{{ credential.issued_by.institution_name }}</td>
-            <td>
-              {% if credential.status == 'ACTIVE' %}
-                <span class="badge-active">Active</span>
-              {% elif credential.status == 'REVOKED' %}
-                <span class="badge-revoked">Revoked</span>
-              {% else %}
-                <span class="badge-pending">{{ credential.status }}</span>
-              {% endif %}
-            </td>
-            <td>
-              {% if credential.status == 'ACTIVE' %}
-                <a href="{% url 'credentials:revoke' credential.credential_id %}"
-                   class="btn-revoke">
-                  Revoke
-                </a>
-              {% endif %}
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+  <!-- Credential status doughnut -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Credential Status</span>
     </div>
-    {% else %}
-      <div style="text-align:center; padding:30px; color:#999;">
-        No credentials in the system yet.
-      </div>
-    {% endif %}
+    <div class="card-body" style="display:flex;align-items:center;justify-content:center;padding:16px;">
+      <canvas id="statusChart" style="max-height:180px;max-width:180px;"></canvas>
+    </div>
   </div>
 
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+<!-- Credentials issued bar chart -->
+<div class="card mb-24">
+  <div class="card-header">
+    <span class="card-title">Credentials Issued — last 6 months</span>
+  </div>
+  <div class="card-body" style="padding-top:12px;">
+    <canvas id="credChart" height="90"></canvas>
+  </div>
+</div>
+
+<!-- Recent Credentials -->
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">Recently Registered Credentials</span>
+    <a href="{% url 'credentials:all' %}" class="btn btn-ghost btn-sm">View all</a>
+  </div>
+  {% if recent_credentials %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Practitioner</th>
+          <th>Qualification</th>
+          <th>License No.</th>
+          <th>Issued By</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in recent_credentials %}
+        <tr>
+          <td class="td-primary">{{ c.practitioner_name }}</td>
+          <td>{{ c.qualification }}</td>
+          <td class="td-mono">{{ c.license_number }}</td>
+          <td>{{ c.issued_by.institution_name }}</td>
+          <td>
+            {% if c.status == 'ACTIVE' %}<span class="badge badge-active">Active</span>
+            {% elif c.status == 'REVOKED' %}<span class="badge badge-revoked">Revoked</span>
+            {% elif c.status == 'EXPIRED' %}<span class="badge badge-expired">Expired</span>
+            {% else %}<span class="badge badge-pending">{{ c.status }}</span>{% endif %}
+          </td>
+          <td>
+            <a href="{% url 'credentials:detail' c.credential_id %}" class="btn btn-secondary btn-sm">View</a>
+            {% if c.status == 'ACTIVE' %}
+              <a href="{% url 'credentials:revoke' c.credential_id %}" class="btn btn-danger btn-sm">Revoke</a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+    </div>
+    <div class="empty-title">No credentials yet</div>
+    <div class="empty-desc">Credentials registered by issuers will appear here.</div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+(function () {
+  const gridColor = 'rgba(0,0,0,0.05)';
+  Chart.defaults.font.family = 'Inter, Arial, sans-serif';
+  Chart.defaults.font.size = 12;
+  Chart.defaults.color = '#64748B';
+
+  /* Verifications line chart */
+  new Chart(document.getElementById('verifChart'), {
+    type: 'line',
+    data: {
+      labels: {{ verif_labels|safe }},
+      datasets: [{
+        label: 'Verifications',
+        data: {{ verif_data|safe }},
+        borderColor: '#2563EB',
+        backgroundColor: 'rgba(37,99,235,0.08)',
+        borderWidth: 2,
+        pointRadius: 3,
+        pointBackgroundColor: '#2563EB',
+        fill: true,
+        tension: 0.35,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: gridColor }, ticks: { maxTicksLimit: 10 } },
+        y: { grid: { color: gridColor }, beginAtZero: true, ticks: { precision: 0 } }
+      }
+    }
+  });
+
+  /* Status doughnut */
+  new Chart(document.getElementById('statusChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Active', 'Revoked', 'Expired'],
+      datasets: [{
+        data: {{ status_data|safe }},
+        backgroundColor: ['#059669', '#DC2626', '#D97706'],
+        borderWidth: 2,
+        borderColor: '#fff',
+      }]
+    },
+    options: {
+      responsive: true,
+      cutout: '68%',
+      plugins: {
+        legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12 } }
+      }
+    }
+  });
+
+  /* Credentials issued bar chart */
+  new Chart(document.getElementById('credChart'), {
+    type: 'bar',
+    data: {
+      labels: {{ cred_labels|safe }},
+      datasets: [{
+        label: 'Credentials Issued',
+        data: {{ cred_data|safe }},
+        backgroundColor: 'rgba(37,99,235,0.75)',
+        borderRadius: 4,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false } },
+        y: { grid: { color: gridColor }, beginAtZero: true, ticks: { precision: 0 } }
+      }
+    }
+  });
+})();
+</script>
+{% endblock %}

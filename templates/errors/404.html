@@ -1,0 +1,29 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page Not Found — VerifyDoc Uganda</title>
+  <link rel="stylesheet" href="{% static 'css/verifydoc.css' %}">
+  <style>
+    body { background: #060E1F; min-height: 100vh; display: flex; align-items: center; justify-content: center; margin: 0; }
+    .err-wrap { text-align: center; padding: 40px 24px; max-width: 480px; }
+    .err-code { font-size: 96px; font-weight: 900; line-height: 1; background: linear-gradient(135deg,#60A5FA,#A78BFA); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
+    .err-title { font-size: 24px; font-weight: 700; color: #fff; margin-bottom: 12px; }
+    .err-sub { font-size: 15px; color: rgba(255,255,255,0.45); line-height: 1.7; margin-bottom: 36px; }
+    .err-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+  <div class="err-wrap">
+    <div class="err-code">404</div>
+    <div class="err-title">Page not found</div>
+    <p class="err-sub">The page you're looking for doesn't exist or has been moved. Double-check the URL or head back to the dashboard.</p>
+    <div class="err-actions">
+      <a href="/" class="btn btn-primary">Go home</a>
+      <a href="javascript:history.back()" class="btn btn-secondary">Go back</a>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>License Expiry Warning — VerifyDoc Uganda</title>
+</head>
+<body style="margin:0;padding:0;background:#F1F5F9;font-family:Arial,Helvetica,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#F1F5F9;padding:32px 16px;">
+  <tr><td align="center">
+    <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;border:1px solid #E2E8F0;max-width:560px;">
+
+      <!-- Header -->
+      <tr>
+        <td style="background:#0F172A;padding:24px 32px;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td><span style="color:#ffffff;font-size:20px;font-weight:700;letter-spacing:-0.3px;">VerifyDoc Uganda</span></td>
+              <td align="right">
+                {% if days_left == 1 %}
+                  <span style="background:#DC2626;color:#ffffff;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;letter-spacing:0.3px;">EXPIRES TOMORROW</span>
+                {% elif days_left <= 7 %}
+                  <span style="background:#D97706;color:#ffffff;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;letter-spacing:0.3px;">EXPIRING IN {{ days_left }} DAYS</span>
+                {% else %}
+                  <span style="background:#D97706;color:#ffffff;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;letter-spacing:0.3px;">EXPIRY WARNING</span>
+                {% endif %}
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+      <tr><td style="background:{% if days_left == 1 %}#DC2626{% else %}#D97706{% endif %};height:4px;"></td></tr>
+
+      <!-- Body -->
+      <tr>
+        <td style="padding:32px;">
+
+          <p style="color:#0F172A;font-size:16px;margin:0 0 8px 0;">Hello {{ recipient_name }},</p>
+          <p style="color:#475569;font-size:15px;line-height:1.6;margin:0 0 28px 0;">
+            {% if days_left == 1 %}
+              <strong style="color:#DC2626;">Urgent:</strong> The following credential expires <strong>tomorrow</strong>. Immediate renewal action is required.
+            {% else %}
+              The following credential will expire in <strong>{{ days_left }} day{{ days_left|pluralize }}</strong>. Please ensure the practitioner renews or updates their license before the expiry date.
+            {% endif %}
+          </p>
+
+          <!-- Credential card -->
+          <table width="100%" cellpadding="0" cellspacing="0"
+            style="background:{% if days_left == 1 %}#FEF2F2{% else %}#FFFBEB{% endif %};
+                   border:1px solid {% if days_left == 1 %}#FECACA{% else %}#FDE68A{% endif %};
+                   border-radius:8px;margin-bottom:28px;">
+            <tr>
+              <td style="padding:20px 24px;border-bottom:1px solid {% if days_left == 1 %}#FECACA{% else %}#FDE68A{% endif %};">
+                <span style="color:{% if days_left == 1 %}#991B1B{% else %}#92400E{% endif %};font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;">
+                  Expiring License Details
+                </span>
+              </td>
+            </tr>
+            <tr><td style="padding:0 24px;">
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding:12px 0;border-bottom:1px solid {% if days_left == 1 %}#FEE2E2{% else %}#FEF3C7{% endif %};color:{% if days_left == 1 %}#991B1B{% else %}#78350F{% endif %};font-size:13px;width:42%;">Practitioner</td>
+                  <td style="padding:12px 0;border-bottom:1px solid {% if days_left == 1 %}#FEE2E2{% else %}#FEF3C7{% endif %};color:{% if days_left == 1 %}#7F1D1D{% else %}#451A03{% endif %};font-size:13px;font-weight:600;">{{ credential.practitioner_name }}</td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 0;border-bottom:1px solid {% if days_left == 1 %}#FEE2E2{% else %}#FEF3C7{% endif %};color:{% if days_left == 1 %}#991B1B{% else %}#78350F{% endif %};font-size:13px;">License Number</td>
+                  <td style="padding:12px 0;border-bottom:1px solid {% if days_left == 1 %}#FEE2E2{% else %}#FEF3C7{% endif %};color:{% if days_left == 1 %}#7F1D1D{% else %}#451A03{% endif %};font-size:13px;font-weight:600;font-family:monospace;">{{ credential.license_number }}</td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 0;border-bottom:1px solid {% if days_left == 1 %}#FEE2E2{% else %}#FEF3C7{% endif %};color:{% if days_left == 1 %}#991B1B{% else %}#78350F{% endif %};font-size:13px;">Qualification</td>
+                  <td style="padding:12px 0;border-bottom:1px solid {% if days_left == 1 %}#FEE2E2{% else %}#FEF3C7{% endif %};color:{% if days_left == 1 %}#7F1D1D{% else %}#451A03{% endif %};font-size:13px;">{{ credential.qualification }}</td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 0;border-bottom:1px solid {% if days_left == 1 %}#FEE2E2{% else %}#FEF3C7{% endif %};color:{% if days_left == 1 %}#991B1B{% else %}#78350F{% endif %};font-size:13px;">Institution</td>
+                  <td style="padding:12px 0;border-bottom:1px solid {% if days_left == 1 %}#FEE2E2{% else %}#FEF3C7{% endif %};color:{% if days_left == 1 %}#7F1D1D{% else %}#451A03{% endif %};font-size:13px;">{{ credential.institution_of_study }}</td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 0;color:{% if days_left == 1 %}#991B1B{% else %}#78350F{% endif %};font-size:13px;">Expiry Date</td>
+                  <td style="padding:12px 0;color:{% if days_left == 1 %}#7F1D1D{% else %}#451A03{% endif %};font-size:13px;font-weight:700;">
+                    {{ credential.license_expiry_date|date:"d F Y" }}
+                    &nbsp;
+                    <span style="background:{% if days_left == 1 %}#DC2626{% else %}#D97706{% endif %};color:#fff;font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;">
+                      {{ days_left }} day{{ days_left|pluralize }} left
+                    </span>
+                  </td>
+                </tr>
+              </table>
+            </td></tr>
+          </table>
+
+          <!-- CTA -->
+          <table cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+            <tr>
+              <td style="background:#2563EB;border-radius:6px;">
+                <a href="{{ credential_url }}" style="display:inline-block;padding:12px 24px;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none;">View Credential &rarr;</a>
+              </td>
+            </tr>
+          </table>
+
+          <p style="color:#94A3B8;font-size:13px;line-height:1.6;margin:0;">
+            Once expired, this credential will no longer pass verification checks. Contact the practitioner to arrange renewal with the relevant licensing body.
+          </p>
+
+        </td>
+      </tr>
+
+      <!-- Footer -->
+      <tr>
+        <td style="background:#F8FAFC;padding:20px 32px;border-top:1px solid #E2E8F0;">
+          <p style="color:#94A3B8;font-size:12px;margin:0 0 4px 0;">This is an automated message — please do not reply.</p>
+          <p style="color:#CBD5E1;font-size:12px;margin:0;">&copy; 2026 VerifyDoc Uganda &mdash; Blockchain-Based Medical Credential Verification</p>
+        </td>
+      </tr>
+
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>

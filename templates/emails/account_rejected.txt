@@ -1,0 +1,15 @@
+VerifyDoc Uganda — Registration Not Approved
+=============================================
+
+Hello {{ user.username }},
+
+Thank you for registering on VerifyDoc Uganda. After review, your account
+registration has not been approved at this time.
+
+{% if reason %}Reason:
+{{ reason }}
+
+{% endif %}If you believe this is an error or would like to provide additional information,
+please contact your institution's system administrator.
+
+— VerifyDoc Uganda System

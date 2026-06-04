@@ -116,3 +116,54 @@ class RegistrationForm(UserCreationForm):
         if commit:
             user.save()
         return user
+
+
+# ───────────────────────────────────────────
+# PROFILE SETTINGS FORM
+# ───────────────────────────────────────────
+
+class ProfileForm(forms.ModelForm):
+    """Lets a logged-in user update their own profile details."""
+
+    class Meta:
+        model = CustomUser
+        fields = ['first_name', 'last_name', 'email', 'institution_name', 'phone_number']
+        widgets = {
+            'first_name':       forms.TextInput(attrs={'class': 'form-control'}),
+            'last_name':        forms.TextInput(attrs={'class': 'form-control'}),
+            'email':            forms.EmailInput(attrs={'class': 'form-control'}),
+            'institution_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'phone_number':     forms.TextInput(attrs={'class': 'form-control'}),
+        }
+
+    def clean_email(self):
+        email = self.cleaned_data['email'].strip().lower()
+        qs = CustomUser.objects.filter(email=email).exclude(pk=self.instance.pk)
+        if qs.exists():
+            raise forms.ValidationError('That email address is already in use.')
+        return email
+
+
+class PasswordChangeForm(forms.Form):
+    """In-profile password change — requires current password for safety."""
+
+    current_password = forms.CharField(
+        label='Current password',
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'autocomplete': 'current-password'}),
+    )
+    new_password = forms.CharField(
+        label='New password',
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'autocomplete': 'new-password'}),
+        min_length=8,
+    )
+    confirm_password = forms.CharField(
+        label='Confirm new password',
+        widget=forms.PasswordInput(attrs={'class': 'form-control', 'autocomplete': 'new-password'}),
+    )
+
+    def clean_confirm_password(self):
+        p1 = self.cleaned_data.get('new_password', '')
+        p2 = self.cleaned_data.get('confirm_password', '')
+        if p1 and p1 != p2:
+            raise forms.ValidationError('Passwords do not match.')
+        return p2

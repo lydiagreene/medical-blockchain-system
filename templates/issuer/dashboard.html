@@ -1,259 +1,183 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Issuer Dashboard | VerifyDoc Uganda</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background-color: #f0f4f8; font-family: Arial, sans-serif; }
+{% extends 'base.html' %}
 
-    /* Sidebar */
-    .sidebar {
-      position: fixed; top: 0; left: 0;
-      width: 250px; height: 100vh;
-      background: #1F3864; color: white;
-      padding: 30px 20px; z-index: 100;
-    }
-    .sidebar-brand {
-      font-size: 1.2rem; font-weight: bold;
-      color: white; margin-bottom: 8px;
-    }
-    .sidebar-role {
-      font-size: 0.75rem; color: #a0b4d0;
-      margin-bottom: 30px;
-      padding-bottom: 20px;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-    .sidebar-link {
-      display: block; color: #a0b4d0;
-      text-decoration: none; padding: 10px 15px;
-      border-radius: 8px; margin-bottom: 5px;
-      font-size: 0.9rem; transition: all 0.2s;
-    }
-    .sidebar-link:hover, .sidebar-link.active {
-      background: rgba(255,255,255,0.1);
-      color: white;
-    }
-    .sidebar-link span { margin-right: 10px; }
-    .sidebar-bottom {
-      position: absolute; bottom: 30px; left: 20px; right: 20px;
-    }
-    .btn-logout {
-      display: block; width: 100%;
-      background: rgba(255,255,255,0.1);
-      color: white; border: none;
-      padding: 10px; border-radius: 8px;
-      text-decoration: none; text-align: center;
-      font-size: 0.9rem;
-    }
-    .btn-logout:hover {
-      background: rgba(255,255,255,0.2); color: white;
-    }
+{% block title %}Issuer Dashboard | VerifyDoc Uganda{% endblock %}
 
-    /* Main Content */
-    .main-content {
-      margin-left: 250px; padding: 30px;
-    }
-    .page-header {
-      margin-bottom: 30px;
-    }
-    .page-header h4 {
-      color: #1F3864; font-weight: bold;
-    }
-    .page-header p {
-      color: #666; font-size: 0.9rem; margin: 0;
-    }
-
-    /* Stat Cards */
-    .stat-card {
-      background: white; border-radius: 12px;
-      padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-      margin-bottom: 20px;
-    }
-    .stat-number {
-      font-size: 2.5rem; font-weight: bold;
-      color: #1F3864; line-height: 1;
-    }
-    .stat-label {
-      color: #666; font-size: 0.85rem;
-      margin-top: 5px;
-    }
-    .stat-icon {
-      font-size: 2rem; float: right;
-      opacity: 0.3;
-    }
-
-    /* Action Card */
-    .action-card {
-      background: #1F3864; border-radius: 12px;
-      padding: 30px; color: white;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 15px rgba(31,56,100,0.3);
-    }
-    .action-card h5 { font-weight: bold; margin-bottom: 10px; }
-    .action-card p { font-size: 0.9rem; color: #a0b4d0; margin-bottom: 20px; }
-    .btn-action {
-      background: white; color: #1F3864;
-      border: none; padding: 10px 25px;
-      border-radius: 8px; font-weight: bold;
-      text-decoration: none; font-size: 0.9rem;
-    }
-    .btn-action:hover { background: #f0f4f8; color: #1F3864; }
-
-    /* Recent Table */
-    .table-card {
-      background: white; border-radius: 12px;
-      padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.06);
-    }
-    .table-title {
-      color: #1F3864; font-weight: bold;
-      font-size: 1rem; margin-bottom: 20px;
-    }
-    .badge-active {
-      background: #d4edda; color: #155724;
-      padding: 4px 10px; border-radius: 20px;
-      font-size: 0.78rem;
-    }
-    .badge-revoked {
-      background: #f8d7da; color: #721c24;
-      padding: 4px 10px; border-radius: 20px;
-      font-size: 0.78rem;
-    }
-  </style>
-</head>
-<body>
-
-<!-- Sidebar -->
-<div class="sidebar">
-  <div class="sidebar-brand">VerifyDoc Uganda</div>
-  <div class="sidebar-role">Issuer Dashboard</div>
-
-  <a href="{% url 'accounts:dashboard' %}" class="sidebar-link active">
-    <span>🏠</span> Dashboard
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="page-title">Welcome back, {{ user.username }}</div>
+    <div class="page-subtitle">{{ user.institution_name }} &mdash; Issuer Account</div>
+  </div>
+  <a href="{% url 'credentials:issue' %}" class="btn btn-primary">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" width="14" height="14"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+    Register Credential
   </a>
-  <a href="{% url 'credentials:issue' %}" class="sidebar-link">
-    <span>➕</span> Register Credential
-  </a>
-  <a href="{% url 'credentials:all' %}" class="sidebar-link">
-    <span>📋</span> My Credentials
-  </a>
+</div>
 
-  <div class="sidebar-bottom">
-    <div style="color:#a0b4d0; font-size:0.8rem; margin-bottom:10px;">
-      {{ user.username }}<br>
-      <span style="font-size:0.75rem;">{{ user.institution_name }}</span>
+<!-- Stats -->
+<div class="grid-3 mb-24">
+  <div class="stat-card">
+    <div class="stat-top-bar"></div>
+    <div class="stat-icon-wrap">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
     </div>
-    <a href="{% url 'accounts:logout' %}" class="btn-logout">
-      🚪 Logout
-    </a>
+    <div class="stat-value">{{ total_credentials }}</div>
+    <div class="stat-label">Total Issued</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-top-bar green"></div>
+    <div class="stat-icon-wrap green">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div class="stat-value">{{ active_credentials }}</div>
+    <div class="stat-label">Active</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-top-bar red"></div>
+    <div class="stat-icon-wrap red">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+    </div>
+    <div class="stat-value">{{ revoked_credentials }}</div>
+    <div class="stat-label">Revoked</div>
   </div>
 </div>
 
-<!-- Main Content -->
-<div class="main-content">
+<!-- Charts -->
+<div class="two-col-sidebar">
 
-  <!-- Header -->
-  <div class="page-header">
-    <h4>Welcome back, {{ user.username }} 👋</h4>
-    <p>{{ user.institution_name }} | Issuer Account</p>
+  <!-- Credentials issued bar chart -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Credentials Issued — last 6 months</span>
+    </div>
+    <div class="card-body" style="padding-top:12px;">
+      <canvas id="credChart" height="130"></canvas>
+    </div>
   </div>
 
-  <!-- Messages -->
-  {% if messages %}
-    {% for message in messages %}
-      <div class="alert alert-{{ message.tags }} mb-3">{{ message }}</div>
-    {% endfor %}
+  <!-- Status doughnut -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Status Breakdown</span>
+    </div>
+    <div class="card-body" style="display:flex;align-items:center;justify-content:center;padding:16px;">
+      <canvas id="statusChart" style="max-height:170px;max-width:170px;"></canvas>
+    </div>
+  </div>
+
+</div>
+
+<!-- CTA card -->
+<div class="action-card mb-24">
+  <h5>Register a New Medical Credential</h5>
+  <p>Add a practitioner's credential to the blockchain. Once registered, it can be verified by any hospital instantly.</p>
+  <a href="{% url 'credentials:issue' %}" class="btn btn-action">Register New Credential</a>
+</div>
+
+<!-- Recent Credentials -->
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">Recently Issued Credentials</span>
+    <a href="{% url 'credentials:all' %}" class="btn btn-ghost btn-sm">View all</a>
+  </div>
+  {% if recent_credentials %}
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Practitioner</th>
+          <th>Qualification</th>
+          <th>License No.</th>
+          <th>Expiry</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in recent_credentials %}
+        <tr>
+          <td class="td-primary">{{ c.practitioner_name }}</td>
+          <td>{{ c.qualification }}</td>
+          <td class="td-mono">{{ c.license_number }}</td>
+          <td>{{ c.license_expiry_date }}</td>
+          <td>
+            {% if c.status == 'ACTIVE' %}<span class="badge badge-active">Active</span>
+            {% elif c.status == 'REVOKED' %}<span class="badge badge-revoked">Revoked</span>
+            {% elif c.status == 'EXPIRED' %}<span class="badge badge-expired">Expired</span>
+            {% else %}<span class="badge badge-pending">{{ c.status }}</span>{% endif %}
+          </td>
+          <td>
+            <a href="{% url 'credentials:detail' c.credential_id %}" class="btn btn-secondary btn-sm">View</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+    </div>
+    <div class="empty-title">No credentials yet</div>
+    <div class="empty-desc">
+      <a href="{% url 'credentials:issue' %}">Register your first credential</a>
+    </div>
+  </div>
   {% endif %}
-
-  <!-- Stats Row -->
-  <div class="row">
-    <div class="col-md-4">
-      <div class="stat-card">
-        <div class="stat-icon">📄</div>
-        <div class="stat-number">{{ total_credentials }}</div>
-        <div class="stat-label">Total Credentials Issued</div>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="stat-card">
-        <div class="stat-icon">✅</div>
-        <div class="stat-number">{{ active_credentials }}</div>
-        <div class="stat-label">Active Credentials</div>
-      </div>
-    </div>
-    <div class="col-md-4">
-      <div class="stat-card">
-        <div class="stat-icon">❌</div>
-        <div class="stat-number">{{ revoked_credentials }}</div>
-        <div class="stat-label">Revoked Credentials</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Action Card -->
-  <div class="action-card">
-    <h5>Register a New Medical Credential</h5>
-    <p>
-      Add a new practitioner's credential to the blockchain.
-      Once registered, it can be verified by any hospital instantly.
-    </p>
-    <a href="{% url 'credentials:issue' %}" class="btn-action">
-      + Register New Credential
-    </a>
-  </div>
-
-  <!-- Recent Credentials Table -->
-  <div class="table-card">
-    <div class="table-title">Recently Issued Credentials</div>
-    {% if recent_credentials %}
-    <div class="table-responsive">
-      <table class="table table-hover" style="font-size:0.9rem;">
-        <thead style="background:#f8f9fa;">
-          <tr>
-            <th>Practitioner</th>
-            <th>Qualification</th>
-            <th>License No.</th>
-            <th>Expiry</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for credential in recent_credentials %}
-          <tr>
-            <td>
-              <strong>{{ credential.practitioner_name }}</strong>
-            </td>
-            <td>{{ credential.qualification }}</td>
-            <td>{{ credential.license_number }}</td>
-            <td>{{ credential.license_expiry_date }}</td>
-            <td>
-              {% if credential.status == 'ACTIVE' %}
-                <span class="badge-active">Active</span>
-              {% else %}
-                <span class="badge-revoked">{{ credential.status }}</span>
-              {% endif %}
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    {% else %}
-      <div style="text-align:center; padding:30px; color:#999;">
-        No credentials issued yet.
-        <br><br>
-        <a href="{% url 'credentials:issue' %}"
-           style="color:#1F3864; font-weight:bold;">
-          Register your first credential →
-        </a>
-      </div>
-    {% endif %}
-  </div>
-
 </div>
+{% endblock %}
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+(function () {
+  const gridColor = 'rgba(0,0,0,0.05)';
+  Chart.defaults.font.family = 'Inter, Arial, sans-serif';
+  Chart.defaults.font.size = 12;
+  Chart.defaults.color = '#64748B';
+
+  new Chart(document.getElementById('credChart'), {
+    type: 'bar',
+    data: {
+      labels: {{ cred_labels|safe }},
+      datasets: [{
+        label: 'Credentials Issued',
+        data: {{ cred_data|safe }},
+        backgroundColor: 'rgba(37,99,235,0.75)',
+        borderRadius: 4,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { display: false } },
+        y: { grid: { color: gridColor }, beginAtZero: true, ticks: { precision: 0 } }
+      }
+    }
+  });
+
+  new Chart(document.getElementById('statusChart'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Active', 'Revoked', 'Expired'],
+      datasets: [{
+        data: {{ status_data|safe }},
+        backgroundColor: ['#059669', '#DC2626', '#D97706'],
+        borderWidth: 2,
+        borderColor: '#fff',
+      }]
+    },
+    options: {
+      responsive: true,
+      cutout: '68%',
+      plugins: {
+        legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12 } }
+      }
+    }
+  });
+})();
+</script>
+{% endblock %}

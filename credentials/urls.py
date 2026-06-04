@@ -13,4 +13,8 @@ urlpatterns = [
     path('verify/', views.verify_credential_view, name='verify'),
     path('revoke/<str:credential_id>/', views.revoke_credential_view, name='revoke'),
     path('all/', views.all_credentials_view, name='all'),
+    path('<str:credential_id>/certificate/', views.certificate_view, name='certificate'),
+    path('<str:credential_id>/renew/', views.renew_credential_view, name='renew'),
+    path('<str:credential_id>/blockchain-status/', views.blockchain_status_view, name='blockchain_status'),
+    path('<str:credential_id>/', views.credential_detail_view, name='detail'),
 ]

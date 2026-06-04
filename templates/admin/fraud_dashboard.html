@@ -1,0 +1,247 @@
+{% extends 'base.html' %}
+
+{% block title %}Fraud Detection | VerifyDoc Uganda{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="breadcrumb">
+      <a href="{% url 'accounts:dashboard' %}">Dashboard</a>
+      <span class="breadcrumb-sep">/</span>
+      <span>Fraud Detection</span>
+    </div>
+    <div class="page-title">Fraud Detection
+      {% if today_flags %}<span class="badge badge-revoked" style="font-size:13px;vertical-align:middle;margin-left:8px;">{{ today_flags }} today</span>{% endif %}
+    </div>
+    <div class="page-subtitle">AI-powered suspicious verification activity monitor</div>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="grid-4 mb-24">
+  <div class="stat-card">
+    <div class="stat-top-bar red"></div>
+    <div class="stat-icon-wrap red">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    </div>
+    <div class="stat-value">{{ total_flags }}</div>
+    <div class="stat-label">Total Flags</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-top-bar amber"></div>
+    <div class="stat-icon-wrap amber">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    </div>
+    <div class="stat-value">{{ today_flags }}</div>
+    <div class="stat-label">Flagged Today</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-top-bar red"></div>
+    <div class="stat-icon-wrap red">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+    </div>
+    <div class="stat-value">{{ high_risk }}</div>
+    <div class="stat-label">High Risk (&ge;70%)</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-top-bar cyan"></div>
+    <div class="stat-icon-wrap cyan">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    </div>
+    <div class="stat-value">{{ avg_score }}%</div>
+    <div class="stat-label">Avg Fraud Score</div>
+  </div>
+</div>
+
+<!-- Charts row -->
+<div class="two-col-sidebar-lg">
+
+  <!-- Flags per day line chart -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Suspicious Flags — last 30 days</span>
+    </div>
+    <div class="card-body" style="padding-top:12px;">
+      <canvas id="flagsChart" height="120"></canvas>
+    </div>
+  </div>
+
+  <!-- Hour-of-day bar chart -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Activity by Hour</span>
+    </div>
+    <div class="card-body" style="padding-top:12px;">
+      <canvas id="hourChart" height="120"></canvas>
+    </div>
+  </div>
+
+</div>
+
+<!-- Two-column lower section -->
+<div class="two-col-sidebar mb-24">
+
+  <!-- Recent suspicious verifications table -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">Recent Suspicious Activity</span>
+      <span class="text-muted text-sm">last 50 flagged attempts</span>
+    </div>
+    {% if recent %}
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>License Queried</th>
+            <th>Result</th>
+            <th>Risk Score</th>
+            <th>Verifier</th>
+            <th>IP Address</th>
+            <th>Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in recent %}
+          <tr>
+            <td class="td-primary td-mono">{{ log.queried_credential_id }}</td>
+            <td>
+              {% if log.result == 'SUCCESS' %}<span class="badge badge-active">Verified</span>
+              {% elif log.result == 'REVOKED' %}<span class="badge badge-revoked">Revoked</span>
+              {% elif log.result == 'NOT_FOUND' %}<span class="badge badge-warning">Not Found</span>
+              {% elif log.result == 'FACE_MISMATCH' %}<span class="badge" style="background:#FEF3C7;color:#92400E;border:1px solid #FDE68A;">Face Mismatch</span>
+              {% else %}<span class="badge badge-failed">{{ log.result }}</span>{% endif %}
+            </td>
+            <td>
+              {% if log.fraud_score %}
+                {% with score_pct=log.fraud_score|floatformat:0 %}
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <div style="flex:1;background:var(--surface-2);border-radius:4px;height:6px;min-width:60px;">
+                    <div style="width:{{ log.fraud_score|floatformat:2|stringformat:'s' }}00%;
+                                max-width:100%;
+                                height:6px;border-radius:4px;
+                                background:{% if log.fraud_score >= 0.7 %}#DC2626{% elif log.fraud_score >= 0.4 %}#D97706{% else %}#059669{% endif %};">
+                    </div>
+                  </div>
+                  <span style="font-size:12px;font-weight:600;color:{% if log.fraud_score >= 0.7 %}#DC2626{% elif log.fraud_score >= 0.4 %}#D97706{% else %}#059669{% endif %};">
+                    {{ log.fraud_score|floatformat:0 }}0%
+                  </span>
+                </div>
+                {% endwith %}
+              {% else %}
+                <span class="text-muted text-sm">—</span>
+              {% endif %}
+            </td>
+            <td class="text-muted text-sm">{{ log.verified_by.username|default:"Public" }}</td>
+            <td class="td-mono text-sm text-muted">{{ log.ip_address|default:"—" }}</td>
+            <td class="text-muted text-sm">{{ log.timestamp|date:"d M, H:i" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon" style="background:#F0FDF4;">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#059669"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="empty-title" style="color:#059669;">All clear</div>
+      <div class="empty-desc">No suspicious activity has been detected yet.</div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Top repeatedly-flagged licenses -->
+  <div class="card" style="align-self:start;">
+    <div class="card-header">
+      <span class="card-title">Most Flagged Licenses</span>
+    </div>
+    {% if top_flagged %}
+    <div class="card-body" style="padding:0;">
+      {% for item in top_flagged %}
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--border);">
+        <span class="td-mono" style="font-size:13px;">{{ item.queried_credential_id }}</span>
+        <span class="badge badge-revoked">{{ item.count }} flag{{ item.count|pluralize }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state" style="padding:24px;">
+      <div class="empty-desc">No repeated flags yet.</div>
+    </div>
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+(function () {
+  const gridColor = 'rgba(0,0,0,0.05)';
+  Chart.defaults.font.family = 'Inter, Arial, sans-serif';
+  Chart.defaults.font.size = 12;
+  Chart.defaults.color = '#64748B';
+
+  /* Flags per day */
+  new Chart(document.getElementById('flagsChart'), {
+    type: 'line',
+    data: {
+      labels: {{ flags_labels|safe }},
+      datasets: [{
+        label: 'Suspicious Flags',
+        data: {{ flags_data|safe }},
+        borderColor: '#DC2626',
+        backgroundColor: 'rgba(220,38,38,0.08)',
+        borderWidth: 2,
+        pointRadius: 3,
+        pointBackgroundColor: '#DC2626',
+        fill: true,
+        tension: 0.35,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { grid: { color: gridColor }, ticks: { maxTicksLimit: 10 } },
+        y: { grid: { color: gridColor }, beginAtZero: true, ticks: { precision: 0 } }
+      }
+    }
+  });
+
+  /* Hour-of-day distribution */
+  new Chart(document.getElementById('hourChart'), {
+    type: 'bar',
+    data: {
+      labels: {{ hour_labels|safe }},
+      datasets: [{
+        label: 'Flags',
+        data: {{ hour_data|safe }},
+        backgroundColor: function(ctx) {
+          const h = ctx.dataIndex;
+          return (h >= 0 && h <= 5) ? 'rgba(220,38,38,0.7)' : 'rgba(217,119,6,0.5)';
+        },
+        borderRadius: 3,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            title: (items) => `Hour: ${items[0].label}`,
+          }
+        }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { maxTicksLimit: 8 } },
+        y: { grid: { color: gridColor }, beginAtZero: true, ticks: { precision: 0 } }
+      }
+    }
+  });
+})();
+</script>
+{% endblock %}

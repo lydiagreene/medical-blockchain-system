@@ -51,7 +51,7 @@ def issue_credential_on_chain(
         )
 
         # Send the transaction
-        tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
+        tx_hash = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
 
         # Wait for confirmation
         receipt = w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
@@ -73,6 +73,36 @@ def issue_credential_on_chain(
             'success': False,
             'error': str(e),
         }
+
+
+def get_tx_status(tx_hash):
+    """
+    Returns live confirmation count and block details for a transaction hash.
+    Used by the credential detail page's async blockchain status indicator.
+    """
+    try:
+        w3, _ = get_contract()
+
+        receipt = w3.eth.get_transaction_receipt(tx_hash)
+        if receipt is None:
+            return {'success': True, 'pending': True, 'confirmations': 0}
+
+        tx_block = receipt['blockNumber']
+        current_block = w3.eth.block_number
+        confirmations = max(0, current_block - tx_block)
+
+        return {
+            'success': True,
+            'pending': False,
+            'tx_block': tx_block,
+            'current_block': current_block,
+            'confirmations': confirmations,
+            'status': receipt.get('status', 1),  # 1 = success, 0 = reverted
+        }
+
+    except Exception as e:
+        logger.warning(f"get_tx_status error for {tx_hash}: {e}")
+        return {'success': False, 'error': str(e)}
 
 
 def verify_credential_on_chain(license_number):
@@ -142,7 +172,7 @@ def revoke_credential_on_chain(license_number):
             private_key=private_key
         )
 
-        tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
+        tx_hash = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
         receipt = w3.eth.wait_for_transaction_receipt(tx_hash, timeout=120)
 
         logger.info(

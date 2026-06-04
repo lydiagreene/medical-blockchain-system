@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block title %}Pending Approvals | VerifyDoc Uganda{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <div class="breadcrumb">
+      <a href="{% url 'accounts:dashboard' %}">Dashboard</a>
+      <span class="breadcrumb-sep">/</span>
+      <span>Pending Approvals</span>
+    </div>
+    <div class="page-title">Pending Approvals
+      {% if pending_count %}<span class="badge badge-warning" style="font-size:14px;vertical-align:middle;margin-left:8px;">{{ pending_count }}</span>{% endif %}
+    </div>
+    <div class="page-subtitle">Review and approve or reject new account registrations</div>
+  </div>
+</div>
+
+{% if pending_users %}
+<div class="card">
+  <div class="card-header">
+    <span class="card-title">Accounts Awaiting Approval</span>
+    <span class="text-muted text-sm">{{ pending_count }} pending</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Role Requested</th>
+          <th>Institution</th>
+          <th>Phone</th>
+          <th>Registered</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for u in pending_users %}
+        <tr>
+          <td>
+            <div class="td-primary">{{ u.username }}</div>
+            <div class="text-muted text-sm">{{ u.email }}</div>
+          </td>
+          <td>
+            {% if u.role == 'ISSUER' %}
+              <span class="badge" style="background:#EFF6FF;color:#1D4ED8;border:1px solid #BFDBFE;">Issuer</span>
+            {% elif u.role == 'VERIFIER' %}
+              <span class="badge" style="background:#F0FDF4;color:#15803D;border:1px solid #BBF7D0;">Verifier</span>
+            {% else %}
+              <span class="badge badge-pending">{{ u.get_role_display }}</span>
+            {% endif %}
+          </td>
+          <td>{{ u.institution_name|default:"—" }}</td>
+          <td class="text-muted">{{ u.phone_number|default:"—" }}</td>
+          <td class="text-muted text-sm">{{ u.date_joined|date:"d M Y, H:i" }}</td>
+          <td>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <!-- Approve -->
+              <form method="POST" action="{% url 'accounts:approve_user' u.pk %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success btn-sm"
+                  onclick="return confirm('Approve account for {{ u.username }}?')">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" width="12" height="12"><polyline points="20 6 9 17 4 12"/></svg>
+                  Approve
+                </button>
+              </form>
+
+              <!-- Reject — opens inline panel -->
+              <button type="button" class="btn btn-danger btn-sm"
+                onclick="toggleReject({{ u.pk }})">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" width="12" height="12"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                Reject
+              </button>
+            </div>
+
+            <!-- Inline reject reason panel -->
+            <div id="reject-panel-{{ u.pk }}" style="display:none;margin-top:12px;">
+              <form method="POST" action="{% url 'accounts:reject_user' u.pk %}">
+                {% csrf_token %}
+                <textarea name="reason" rows="2" placeholder="Reason for rejection (optional — will be emailed to the user)"
+                  style="width:100%;padding:8px 10px;font-size:13px;border:1px solid var(--border);border-radius:var(--radius-s);resize:vertical;font-family:inherit;color:var(--text);background:var(--bg);margin-bottom:8px;"></textarea>
+                <div style="display:flex;gap:8px;">
+                  <button type="submit" class="btn btn-danger btn-sm">Confirm Rejection</button>
+                  <button type="button" class="btn btn-ghost btn-sm" onclick="toggleReject({{ u.pk }})">Cancel</button>
+                </div>
+              </form>
+            </div>
+
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% else %}
+<div class="card">
+  <div class="empty-state">
+    <div class="empty-icon" style="background:var(--accent-light);">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+    </div>
+    <div class="empty-title">All caught up</div>
+    <div class="empty-desc">No accounts are waiting for approval right now.</div>
+    <a href="{% url 'accounts:dashboard' %}" class="btn btn-primary" style="margin-top:16px;">Back to Dashboard</a>
+  </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  function toggleReject(userId) {
+    const panel = document.getElementById('reject-panel-' + userId);
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    if (panel.style.display === 'block') {
+      panel.querySelector('textarea').focus();
+    }
+  }
+</script>
+{% endblock %}

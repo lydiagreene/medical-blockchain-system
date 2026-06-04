@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>New Account Pending Approval — VerifyDoc Uganda</title>
+</head>
+<body style="margin:0;padding:0;background:#F1F5F9;font-family:Arial,Helvetica,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#F1F5F9;padding:32px 16px;">
+  <tr><td align="center">
+    <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:8px;overflow:hidden;border:1px solid #E2E8F0;max-width:560px;">
+
+      <!-- Header -->
+      <tr>
+        <td style="background:#0F172A;padding:24px 32px;">
+          <table width="100%" cellpadding="0" cellspacing="0">
+            <tr>
+              <td>
+                <span style="color:#ffffff;font-size:20px;font-weight:700;letter-spacing:-0.3px;">VerifyDoc Uganda</span>
+              </td>
+              <td align="right">
+                <span style="background:#D97706;color:#ffffff;font-size:11px;font-weight:600;padding:4px 10px;border-radius:20px;letter-spacing:0.3px;">ACTION REQUIRED</span>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+
+      <!-- Amber status bar -->
+      <tr><td style="background:#D97706;height:4px;"></td></tr>
+
+      <!-- Body -->
+      <tr>
+        <td style="padding:32px;">
+
+          <p style="color:#0F172A;font-size:16px;margin:0 0 8px 0;">Hello Admin,</p>
+          <p style="color:#475569;font-size:15px;line-height:1.6;margin:0 0 28px 0;">
+            A new user has registered on <strong>VerifyDoc Uganda</strong> and is waiting for your approval before they can access the system.
+          </p>
+
+          <!-- User card -->
+          <table width="100%" cellpadding="0" cellspacing="0" style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;margin-bottom:28px;">
+            <tr><td style="padding:20px 24px;border-bottom:1px solid #FDE68A;">
+              <span style="color:#92400E;font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;">New Account Details</span>
+            </td></tr>
+            <tr><td style="padding:0 24px;">
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding:12px 0;border-bottom:1px solid #FEF3C7;color:#78350F;font-size:13px;width:42%;">Username</td>
+                  <td style="padding:12px 0;border-bottom:1px solid #FEF3C7;color:#451A03;font-size:13px;font-weight:600;">{{ new_user.username }}</td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 0;border-bottom:1px solid #FEF3C7;color:#78350F;font-size:13px;">Email</td>
+                  <td style="padding:12px 0;border-bottom:1px solid #FEF3C7;color:#451A03;font-size:13px;">{{ new_user.email }}</td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 0;border-bottom:1px solid #FEF3C7;color:#78350F;font-size:13px;">Role Requested</td>
+                  <td style="padding:12px 0;border-bottom:1px solid #FEF3C7;color:#451A03;font-size:13px;font-weight:600;">{{ new_user.get_role_display }}</td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 0;border-bottom:1px solid #FEF3C7;color:#78350F;font-size:13px;">Institution</td>
+                  <td style="padding:12px 0;border-bottom:1px solid #FEF3C7;color:#451A03;font-size:13px;">{{ new_user.institution_name|default:"Not provided" }}</td>
+                </tr>
+                <tr>
+                  <td style="padding:12px 0;color:#78350F;font-size:13px;">Registered</td>
+                  <td style="padding:12px 0;color:#451A03;font-size:13px;">{{ new_user.created_at|date:"d M Y, H:i" }}</td>
+                </tr>
+              </table>
+            </td></tr>
+          </table>
+
+          <!-- CTA button -->
+          <table cellpadding="0" cellspacing="0" style="margin-bottom:24px;">
+            <tr>
+              <td style="background:#2563EB;border-radius:6px;">
+                <a href="{{ admin_url }}" style="display:inline-block;padding:12px 24px;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none;">Review in Admin Panel &rarr;</a>
+              </td>
+            </tr>
+          </table>
+
+          <p style="color:#94A3B8;font-size:13px;line-height:1.6;margin:0;">
+            The user will not be able to log in until their account is approved. Please review promptly.
+          </p>
+
+        </td>
+      </tr>
+
+      <!-- Footer -->
+      <tr>
+        <td style="background:#F8FAFC;padding:20px 32px;border-top:1px solid #E2E8F0;">
+          <p style="color:#94A3B8;font-size:12px;margin:0 0 4px 0;">This is an automated message — please do not reply.</p>
+          <p style="color:#CBD5E1;font-size:12px;margin:0;">&copy; 2026 VerifyDoc Uganda &mdash; Blockchain-Based Medical Credential Verification</p>
+        </td>
+      </tr>
+
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>

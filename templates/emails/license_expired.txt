@@ -1,0 +1,23 @@
+VerifyDoc Uganda — Credential Expired
+======================================
+
+Hello {{ recipient_name }},
+
+The following credential has expired and has been automatically marked
+as inactive on VerifyDoc Uganda. It will now fail all verification attempts.
+
+EXPIRED CREDENTIAL
+------------------
+Practitioner  : {{ credential.practitioner_name }}
+License Number: {{ credential.license_number }}
+Qualification : {{ credential.qualification }}
+Expired On    : {{ credential.license_expiry_date|date:"d F Y" }}
+Status        : EXPIRED
+
+View the credential:
+{{ credential_url }}
+
+To reactivate this practitioner, the issuing institution must register
+a renewed credential with an updated license date.
+
+— VerifyDoc Uganda System

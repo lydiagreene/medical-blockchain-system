@@ -1,128 +1,41 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login | VerifyDoc Uganda</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body {
-      background-color: #f0f4f8;
-      font-family: Arial, sans-serif;
-    }
-    .login-card {
-      max-width: 420px;
-      margin: 80px auto;
-      background: white;
-      border-radius: 12px;
-      padding: 40px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    }
-    .brand-title {
-      color: #1F3864;
-      font-weight: bold;
-      font-size: 1.8rem;
-    }
-    .brand-subtitle {
-      color: #666;
-      font-size: 0.9rem;
-      margin-bottom: 30px;
-    }
-    .btn-login {
-      background-color: #1F3864;
-      color: white;
-      width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      font-size: 1rem;
-      margin-top: 10px;
-    }
-    .btn-login:hover {
-      background-color: #2E5F8A;
-      color: white;
-    }
-    .form-label {
-      font-weight: 600;
-      color: #333;
-      font-size: 0.9rem;
-    }
-    .register-link {
-      text-align: center;
-      margin-top: 20px;
-      font-size: 0.9rem;
-      color: #666;
-    }
-    .register-link a {
-      color: #1F3864;
-      font-weight: bold;
-      text-decoration: none;
-    }
-  </style>
-</head>
-<body>
+{% extends 'base_auth.html' %}
 
-<div class="login-card">
+{% block title %}Sign In | VerifyDoc Uganda{% endblock %}
 
-  <!-- Header -->
-  <div class="text-center mb-4">
-    <div class="brand-title">VerifyDoc Uganda</div>
-    <div class="brand-subtitle">
-      Blockchain-Based Medical Credential Verification
-    </div>
-    <h5 style="color: #333;">Welcome Back</h5>
+{% block content %}
+<div class="auth-title">Welcome back</div>
+<div class="auth-subtitle">Sign in to your VerifyDoc account</div>
+
+<form method="POST">
+  {% csrf_token %}
+
+  <div class="form-group">
+    <label class="form-label">Username</label>
+    {{ form.username }}
+    {% if form.username.errors %}
+      <div class="form-error">{{ form.username.errors.0 }}</div>
+    {% endif %}
   </div>
 
-  <!-- Messages -->
-  {% if messages %}
-    {% for message in messages %}
-      <div class="alert alert-warning" style="font-size:0.9rem; border-radius:8px;">
-        {{ message }}
-      </div>
-    {% endfor %}
-  {% endif %}
-
-  <!-- Login Form -->
-  <form method="POST">
-    {% csrf_token %}
-
-    <!-- Username -->
-    <div class="mb-3">
-      <label class="form-label">Username</label>
-      {{ form.username }}
-      {% if form.username.errors %}
-        <div class="text-danger" style="font-size:0.85rem;">
-          {{ form.username.errors }}
-        </div>
-      {% endif %}
-    </div>
-
-    <!-- Password -->
-    <div class="mb-3">
-      <label class="form-label">Password</label>
-      {{ form.password }}
-      {% if form.password.errors %}
-        <div class="text-danger" style="font-size:0.85rem;">
-          {{ form.password.errors }}
-        </div>
-      {% endif %}
-    </div>
-
-    <!-- Submit -->
-    <button type="submit" class="btn btn-login">
-      Login
-    </button>
-
-  </form>
-
-  <!-- Register Link -->
-  <div class="register-link">
-    Don't have an account?
-    <a href="{% url 'accounts:register' %}">Register here</a>
+  <div class="form-group">
+    <label class="form-label">Password</label>
+    {{ form.password }}
+    {% if form.password.errors %}
+      <div class="form-error">{{ form.password.errors.0 }}</div>
+    {% endif %}
   </div>
 
+  <button type="submit" class="btn btn-primary btn-full btn-lg">Sign in</button>
+
+  <div style="text-align:center; margin-top:14px;">
+    <a href="{% url 'accounts:password_reset' %}" class="text-muted text-sm">Forgot your password?</a>
+  </div>
+</form>
+
+<div class="auth-footer">
+  Don't have an account? <a href="{% url 'accounts:register' %}">Create one</a>
 </div>
+{% endblock %}
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+{% block side_title %}Sign in to manage credentials{% endblock %}
+{% block side_desc %}Access your dashboard to issue, verify, or manage medical practitioner credentials across Uganda.{% endblock %}

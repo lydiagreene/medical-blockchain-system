@@ -94,24 +94,24 @@ def compare_faces(registered_image_path, live_image_path):
         result = DeepFace.verify(
             img1_path=registered_image_path,
             img2_path=live_image_path,
-            model_name='VGG-Face',
+            model_name='Facenet',
             enforce_detection=False,
             detector_backend='opencv',
             distance_metric='cosine',
         )
 
-        is_match = result['verified']
-        distance = result['distance']
-        threshold = result['threshold']
+        is_match = bool(result['verified'])
+        distance = float(result['distance'])
+        threshold = float(result['threshold'])
 
         # Convert distance to a similarity score (0 to 1)
         # Lower distance = more similar
-        similarity_score = max(0, 1 - (distance / threshold))
+        similarity_score = max(0.0, 1.0 - (distance / threshold))
 
         logger.info(
-            f"Raw result: verified={result['verified']}, "
-            f"distance={result['distance']}, "
-            f"threshold={result['threshold']}"
+            f"Raw result: verified={is_match}, "
+            f"distance={distance}, "
+            f"threshold={threshold}"
         )
 
         return {

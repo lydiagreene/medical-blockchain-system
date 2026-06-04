@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="VerifyDoc Uganda — Blockchain-Based Medical Credential Verification" />
+  <title>VerifyDoc Uganda</title>
+
+  {% for css_url in css_urls %}
+  <link rel="stylesheet" href="{{ css_url }}" />
+  {% endfor %}
+</head>
+<body>
+  <div id="root"></div>
+  {% if js_url %}
+  <script type="module" src="{{ js_url }}"></script>
+  {% else %}
+  <div style="font-family:sans-serif;text-align:center;padding:4rem;color:#666">
+    <h2>React build not found</h2>
+    <p>Run <code>npm run build</code> inside the <code>frontend/</code> directory.</p>
+  </div>
+  {% endif %}
+</body>
+</html>

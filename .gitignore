@@ -29,3 +29,15 @@ desktop.ini
 # Logs
 logs/
 *.log
+install_log.txt
+
+# Collected static (regenerated via `collectstatic`)
+staticfiles/
+
+# Scratch
+temp
+
+# SSL certificates / private keys (provide at deploy time)
+nginx/ssl/*.pem
+nginx/ssl/*.pfx
+nginx/ssl/*.key

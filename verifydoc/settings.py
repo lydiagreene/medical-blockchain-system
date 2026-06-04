@@ -4,6 +4,7 @@ Blockchain-Based Medical Credential Verification System
 """
 
 import os
+import sentry_sdk
 from pathlib import Path
 from decouple import config
 
@@ -48,6 +49,18 @@ INSTALLED_APPS = [
     'biometrics',
     'fraud_detection',
     'ipfs',
+
+    # REST API
+    'rest_framework',
+    'rest_framework.authtoken',
+
+    # CORS (allow React dev server to call the API)
+    'corsheaders',
+
+    # OpenAPI / Swagger docs
+    'drf_spectacular',
+
+    'api',
 ]
 
 
@@ -56,6 +69,7 @@ INSTALLED_APPS = [
 # ───────────────────────────────────────────
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',        # must be first
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',  # serves static files
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -64,6 +78,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'verifydoc.middleware.SecurityHeadersMiddleware',  # CSP + security headers
 ]
 
 
@@ -106,12 +121,20 @@ WSGI_APPLICATION = 'verifydoc.wsgi.application'
 # DATABASE
 # ───────────────────────────────────────────
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Supports both SQLite (dev) and PostgreSQL (prod) via DATABASE_URL env var.
+# Dev:  DATABASE_URL=sqlite:///db.sqlite3
+# Prod: DATABASE_URL=postgres://user:pass@host:5432/dbname
+try:
+    import dj_database_url
+    _db_url = config('DATABASE_URL', default=f'sqlite:///{BASE_DIR / "db.sqlite3"}')
+    DATABASES = {'default': dj_database_url.parse(_db_url, conn_max_age=600)}
+except ImportError:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
 
 
 # ───────────────────────────────────────────
@@ -191,6 +214,31 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
 # ───────────────────────────────────────────
+# SECURITY HARDENING (active when DEBUG=False)
+# ───────────────────────────────────────────
+
+# Always on — prevents clickjacking regardless of environment
+X_FRAME_OPTIONS = 'DENY'
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+if not DEBUG:
+    # Force all traffic over HTTPS
+    SECURE_SSL_REDIRECT = config('SECURE_SSL_REDIRECT', default=True, cast=bool)
+
+    # Tell browsers to only connect via HTTPS for 1 year
+    SECURE_HSTS_SECONDS = config('SECURE_HSTS_SECONDS', default=31536000, cast=int)
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+
+    # Cookies only sent over HTTPS
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
+    # Trust the X-Forwarded-Proto header from reverse proxies (Nginx, Render, etc.)
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+
+# ───────────────────────────────────────────
 # MEDIA FILES
 # ───────────────────────────────────────────
 
@@ -204,6 +252,22 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # ───────────────────────────────────────────
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# ───────────────────────────────────────────
+# CORS
+# ───────────────────────────────────────────
+
+# Dev: Vite runs on 5173. Prod: add your domain to CORS_ALLOWED_ORIGINS env var.
+# e.g. CORS_ALLOWED_ORIGINS=https://verifydoc.ug,https://www.verifydoc.ug
+_cors_extra = [
+    o.strip() for o in config('CORS_ALLOWED_ORIGINS', default='').split(',') if o.strip()
+]
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+] + _cors_extra
+CORS_ALLOW_CREDENTIALS = True
 
 
 # ───────────────────────────────────────────
@@ -234,12 +298,23 @@ PINATA = {
 # EMAIL SETTINGS
 # ───────────────────────────────────────────
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = config(
+    'EMAIL_BACKEND',
+    default='django.core.mail.backends.console.EmailBackend'
+)
 EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
 EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
 EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+DEFAULT_FROM_EMAIL = config('EMAIL_HOST_USER', default='noreply@verifydoc.ug')
+
+# Base URL used in email links — no trailing slash
+SITE_URL = config('SITE_URL', default='http://127.0.0.1:8000')
+
+# React frontend base URL — used in password reset emails so the link opens the SPA.
+# Dev: Vite runs on 5173. Prod: same domain as SITE_URL (set FRONTEND_URL=https://yourdomain.com).
+FRONTEND_URL = config('FRONTEND_URL', default='http://localhost:5173')
 
 
 # ───────────────────────────────────────────
@@ -275,6 +350,66 @@ LOGGING = {
 
 
 # ───────────────────────────────────────────
+# DJANGO REST FRAMEWORK
+# ───────────────────────────────────────────
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'api.authentication.CookieTokenAuthentication',      # HttpOnly cookie (primary)
+        'api.authentication.ExpiringTokenAuthentication',    # Bearer header (API clients)
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        # Global fallback rates
+        'anon': '120/hour',
+        'user': '1000/hour',
+        # Per-endpoint named scopes (see api/throttles.py)
+        'login':          '5/min',    # 5 login attempts per minute per IP
+        'two_factor':     '5/min',    # 5 OTP attempts per minute per IP
+        'password_reset': '3/hour',   # 3 reset emails per hour per IP
+        'public_verify':  '30/min',   # 30 public lookups per minute per IP
+        'face_verify':    '20/hour',  # 20 biometric checks per hour per user
+    },
+}
+
+
+# ───────────────────────────────────────────
+# SESSION / TOKEN SECURITY
+# ───────────────────────────────────────────
+
+# Auth tokens expire after this many hours; users must re-authenticate
+TOKEN_EXPIRY_HOURS = config('TOKEN_EXPIRY_HOURS', default=8, cast=int)
+
+# Lockout thresholds — configurable via env
+LOGIN_MAX_ATTEMPTS  = config('LOGIN_MAX_ATTEMPTS',  default=10, cast=int)
+LOGIN_LOCKOUT_MINS  = config('LOGIN_LOCKOUT_MINS',  default=15, cast=int)
+
+
+# ───────────────────────────────────────────
+# AFRICA'S TALKING — SMS
+# ───────────────────────────────────────────
+# Leave AT_USERNAME / AT_API_KEY empty to disable SMS (emails still send).
+# Sandbox: username="sandbox", api_key="any-string"
+AT_USERNAME   = config('AT_USERNAME',  default='')
+AT_API_KEY    = config('AT_API_KEY',   default='')
+AT_SENDER_ID  = config('AT_SENDER_ID', default='')   # Alphanumeric sender ID (must be registered)
+AT_SHORTCODE  = config('AT_SHORTCODE', default='')   # Short code alternative to sender ID
+AT_COUNTRY_CODE = config('AT_COUNTRY_CODE', default='256')  # Uganda
+
+
+# ───────────────────────────────────────────
 # FRAUD DETECTION SETTINGS
 # ───────────────────────────────────────────
 
@@ -296,4 +431,74 @@ BIOMETRICS = {
     'MATCH_THRESHOLD': 0.6,
     # Folder where practitioner photos are temporarily stored
     'PHOTO_DIR': BASE_DIR / 'media/practitioner_photos',
+}
+
+
+# ───────────────────────────────────────────
+# SENTRY ERROR TRACKING
+# ───────────────────────────────────────────
+# Set SENTRY_DSN in .env to enable. Leave empty to disable (dev default).
+
+SENTRY_DSN = config('SENTRY_DSN', default='')
+
+if SENTRY_DSN:
+    from sentry_sdk.integrations.django import DjangoIntegration
+    from sentry_sdk.integrations.logging import LoggingIntegration
+    import logging
+
+    _SENSITIVE_KEYS = {
+        'DEPLOYER_PRIVATE_KEY', 'SECRET_KEY', 'PINATA_SECRET_KEY',
+        'EMAIL_HOST_PASSWORD', 'AT_API_KEY', 'totp_secret',
+        'totp_backup_codes', 'password', 'token', 'auth_token',
+    }
+
+    def _before_send(event, hint):
+        """Scrub sensitive keys from Sentry events before sending."""
+        def _scrub(obj):
+            if isinstance(obj, dict):
+                return {
+                    k: '[Filtered]' if k in _SENSITIVE_KEYS else _scrub(v)
+                    for k, v in obj.items()
+                }
+            if isinstance(obj, list):
+                return [_scrub(i) for i in obj]
+            return obj
+        return _scrub(event)
+
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[
+            DjangoIntegration(transaction_style='url'),
+            LoggingIntegration(level=logging.INFO, event_level=logging.ERROR),
+        ],
+        traces_sample_rate=0.2,
+        profiles_sample_rate=0.1,
+        send_default_pii=False,
+        before_send=_before_send,
+        environment='production' if not DEBUG else 'development',
+        release=config('APP_VERSION', default='1.0.0'),
+    )
+
+
+# ───────────────────────────────────────────
+# OPENAPI / SWAGGER (drf-spectacular)
+# ───────────────────────────────────────────
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'VerifyDoc Uganda API',
+    'DESCRIPTION': (
+        'Blockchain-based Medical Credential Verification System. '
+        'All endpoints under /api/v1/ — authenticate with Token <your-token> header.'
+    ),
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SCHEMA_PATH_PREFIX': '/api/v1/',
+    'TAGS': [
+        {'name': 'auth',         'description': 'Login, register, password reset, profile'},
+        {'name': 'credentials',  'description': 'Issue, list, detail, revoke, renew credentials'},
+        {'name': 'biometrics',   'description': 'Face verification'},
+        {'name': 'admin',        'description': 'Admin-only: users, audit log, fraud, institutions'},
+        {'name': 'public',       'description': 'Public credential lookup (no auth)'},
+    ],
 }

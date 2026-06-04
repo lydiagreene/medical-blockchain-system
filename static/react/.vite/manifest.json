@@ -1,0 +1,201 @@
+{
+  "_EmptyState-wLU2yUva.js": {
+    "file": "assets/EmptyState-wLU2yUva.js",
+    "name": "EmptyState",
+    "imports": [
+      "src/main.jsx"
+    ]
+  },
+  "_StatusBadge-txWCKwk7.js": {
+    "file": "assets/StatusBadge-txWCKwk7.js",
+    "name": "StatusBadge",
+    "imports": [
+      "src/main.jsx"
+    ]
+  },
+  "_activity-CQzg07j8.js": {
+    "file": "assets/activity-CQzg07j8.js",
+    "name": "activity",
+    "imports": [
+      "src/main.jsx"
+    ]
+  },
+  "_camera-B0Jf1IEZ.js": {
+    "file": "assets/camera-B0Jf1IEZ.js",
+    "name": "camera",
+    "imports": [
+      "src/main.jsx"
+    ]
+  },
+  "_download-DaK5gdAD.js": {
+    "file": "assets/download-DaK5gdAD.js",
+    "name": "download",
+    "imports": [
+      "src/main.jsx"
+    ]
+  },
+  "_phone-Be6278hI.js": {
+    "file": "assets/phone-Be6278hI.js",
+    "name": "phone",
+    "imports": [
+      "src/main.jsx"
+    ]
+  },
+  "_shield-off-LX4Z0v0p.js": {
+    "file": "assets/shield-off-LX4Z0v0p.js",
+    "name": "shield-off",
+    "imports": [
+      "src/main.jsx"
+    ]
+  },
+  "src/main.jsx": {
+    "file": "assets/main-BaeQZIoO.js",
+    "name": "main",
+    "src": "src/main.jsx",
+    "isEntry": true,
+    "dynamicImports": [
+      "src/pages/Dashboard.jsx",
+      "src/pages/admin/AllCredentials.jsx",
+      "src/pages/admin/PendingUsers.jsx",
+      "src/pages/admin/AuditLog.jsx",
+      "src/pages/admin/FraudDashboard.jsx",
+      "src/pages/admin/Institutions.jsx",
+      "src/pages/issuer/IssueCredential.jsx",
+      "src/pages/issuer/IssuerCredentials.jsx",
+      "src/pages/verifier/VerifyCredential.jsx",
+      "src/pages/verifier/FaceVerify.jsx",
+      "src/pages/CredentialDetail.jsx",
+      "src/pages/Profile.jsx"
+    ],
+    "css": [
+      "assets/main-Cfxg4tdA.css"
+    ]
+  },
+  "src/pages/CredentialDetail.jsx": {
+    "file": "assets/CredentialDetail-CvDE6vOc.js",
+    "name": "CredentialDetail",
+    "src": "src/pages/CredentialDetail.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.jsx",
+      "_download-DaK5gdAD.js",
+      "_StatusBadge-txWCKwk7.js"
+    ]
+  },
+  "src/pages/Dashboard.jsx": {
+    "file": "assets/Dashboard-D6x8EQqT.js",
+    "name": "Dashboard",
+    "src": "src/pages/Dashboard.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.jsx",
+      "_activity-CQzg07j8.js",
+      "_StatusBadge-txWCKwk7.js"
+    ]
+  },
+  "src/pages/Profile.jsx": {
+    "file": "assets/Profile-LAV5s6kf.js",
+    "name": "Profile",
+    "src": "src/pages/Profile.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.jsx",
+      "_phone-Be6278hI.js"
+    ]
+  },
+  "src/pages/admin/AllCredentials.jsx": {
+    "file": "assets/AllCredentials-Cwc4tqJp.js",
+    "name": "AllCredentials",
+    "src": "src/pages/admin/AllCredentials.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.jsx",
+      "_download-DaK5gdAD.js",
+      "_EmptyState-wLU2yUva.js",
+      "_StatusBadge-txWCKwk7.js"
+    ]
+  },
+  "src/pages/admin/AuditLog.jsx": {
+    "file": "assets/AuditLog-BIEpP7N1.js",
+    "name": "AuditLog",
+    "src": "src/pages/admin/AuditLog.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.jsx",
+      "_EmptyState-wLU2yUva.js"
+    ]
+  },
+  "src/pages/admin/FraudDashboard.jsx": {
+    "file": "assets/FraudDashboard-BmC4A15L.js",
+    "name": "FraudDashboard",
+    "src": "src/pages/admin/FraudDashboard.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.jsx",
+      "_activity-CQzg07j8.js",
+      "_shield-off-LX4Z0v0p.js"
+    ]
+  },
+  "src/pages/admin/Institutions.jsx": {
+    "file": "assets/Institutions-BzBCmO6P.js",
+    "name": "Institutions",
+    "src": "src/pages/admin/Institutions.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.jsx",
+      "_phone-Be6278hI.js",
+      "_EmptyState-wLU2yUva.js"
+    ]
+  },
+  "src/pages/admin/PendingUsers.jsx": {
+    "file": "assets/PendingUsers-tak4gCl-.js",
+    "name": "PendingUsers",
+    "src": "src/pages/admin/PendingUsers.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.jsx",
+      "_shield-off-LX4Z0v0p.js"
+    ]
+  },
+  "src/pages/issuer/IssueCredential.jsx": {
+    "file": "assets/IssueCredential-CsSVml4W.js",
+    "name": "IssueCredential",
+    "src": "src/pages/issuer/IssueCredential.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.jsx",
+      "_camera-B0Jf1IEZ.js"
+    ]
+  },
+  "src/pages/issuer/IssuerCredentials.jsx": {
+    "file": "assets/IssuerCredentials-BT6P_3XP.js",
+    "name": "IssuerCredentials",
+    "src": "src/pages/issuer/IssuerCredentials.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.jsx",
+      "_EmptyState-wLU2yUva.js",
+      "_StatusBadge-txWCKwk7.js"
+    ]
+  },
+  "src/pages/verifier/FaceVerify.jsx": {
+    "file": "assets/FaceVerify-DSxTrAFa.js",
+    "name": "FaceVerify",
+    "src": "src/pages/verifier/FaceVerify.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.jsx",
+      "_camera-B0Jf1IEZ.js"
+    ]
+  },
+  "src/pages/verifier/VerifyCredential.jsx": {
+    "file": "assets/VerifyCredential-BusvGVvZ.js",
+    "name": "VerifyCredential",
+    "src": "src/pages/verifier/VerifyCredential.jsx",
+    "isDynamicEntry": true,
+    "imports": [
+      "src/main.jsx",
+      "_StatusBadge-txWCKwk7.js"
+    ]
+  }
+}

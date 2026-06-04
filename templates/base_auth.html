@@ -1,0 +1,78 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}VerifyDoc Uganda{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/verifydoc.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+<div class="auth-shell">
+
+  <!-- Form panel -->
+  <div class="auth-panel">
+    <div class="auth-card">
+
+      <div class="auth-logo">
+        <div class="auth-logo-mark">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+        </div>
+        <span class="auth-logo-name">VerifyDoc Uganda</span>
+      </div>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{% if message.tags == 'error' or message.tags == 'danger' %}error{% elif message.tags == 'success' %}success{% elif message.tags == 'warning' %}warning{% else %}info{% endif %} mb-16">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+
+  <!-- Brand panel -->
+  <div class="auth-side">
+    <div class="auth-side-content">
+      <div class="auth-side-title">{% block side_title %}Secure Medical Credential Verification{% endblock %}</div>
+      <div class="auth-side-desc">{% block side_desc %}A blockchain-powered registry ensuring every medical credential in Uganda is genuine, tamper-proof, and instantly verifiable.{% endblock %}</div>
+
+      {% block side_features %}
+      <div class="auth-feature">
+        <div class="auth-feature-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        </div>
+        <div class="auth-feature-label">
+          <strong>Blockchain-Backed</strong>
+          Immutable records on Ethereum Sepolia
+        </div>
+      </div>
+      <div class="auth-feature">
+        <div class="auth-feature-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/></svg>
+        </div>
+        <div class="auth-feature-label">
+          <strong>Biometric Verification</strong>
+          Face-match confirms practitioner identity
+        </div>
+      </div>
+      <div class="auth-feature">
+        <div class="auth-feature-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="auth-feature-label">
+          <strong>Real-Time Results</strong>
+          Instant credential status checks
+        </div>
+      </div>
+      {% endblock %}
+    </div>
+  </div>
+
+</div>
+{% block extra_js %}{% endblock %}
+</body>
+</html>
