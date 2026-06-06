@@ -269,6 +269,13 @@ CORS_ALLOWED_ORIGINS = [
 ] + _cors_extra
 CORS_ALLOW_CREDENTIALS = True
 
+# Origins trusted for CSRF on unsafe POSTs over HTTPS (required for the Django
+# /admin/ login when DEBUG=False behind a proxy). Comma-separated, scheme included,
+# e.g. CSRF_TRUSTED_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
+CSRF_TRUSTED_ORIGINS = [
+    o.strip() for o in config('CSRF_TRUSTED_ORIGINS', default='').split(',') if o.strip()
+]
+
 
 # ───────────────────────────────────────────
 # BLOCKCHAIN SETTINGS

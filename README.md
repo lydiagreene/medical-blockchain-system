@@ -238,6 +238,8 @@ A full endpoint table also lives in [`progress.md`](progress.md).
 
 The repo ships a multi-stage `Dockerfile` (Node 20 builds React → Python 3.12 runs Django/Gunicorn) and a `docker-compose.yml` wiring Postgres + Django + Nginx.
 
+> 📘 **Deploying for free?** See **[`DEPLOYMENT.md`](DEPLOYMENT.md)** for a complete step-by-step guide to hosting the whole stack on an **Oracle Cloud Always Free** VM (handles the heavy DeepFace/TensorFlow workload at no cost), including HTTPS via Let's Encrypt and the daily expiry cron.
+
 ```bash
 # 1. Create a production .env (DEBUG=False, real DATABASE_URL, POSTGRES_PASSWORD, secrets, CORS_ALLOWED_ORIGINS)
 # 2. Place TLS certs at nginx/ssl/fullchain.pem and nginx/ssl/privkey.pem  (NOT committed — provide at deploy time)
