@@ -1,7 +1,8 @@
 # VerifyDoc Uganda — Project Progress
 
-**Last updated:** 2026-05-21  
+**Last updated:** 2026-06-06  
 **Stack:** Django 4.2.7 · DRF 3.14.0 · React 19 · Vite 8 · Tailwind CSS v3 · Framer Motion · Recharts · Ethereum (Sepolia) · IPFS/Pinata · DeepFace · Africa's Talking
+**Repo:** https://github.com/lydiagreene/medical-blockchain-system (branch `main`)
 
 ---
 
@@ -43,12 +44,28 @@ medical-blockchain-system/
 │       └── pages/         all page components (see table below)
 ├── Dockerfile         Multi-stage: Node 20 (React build) → Python 3.12 (Django)
 ├── docker-compose.yml db (Postgres 16) + django (Gunicorn) + nginx
-└── .dockerignore
+├── .dockerignore
+├── README.md          Project overview + step-by-step local dev setup (collaborators)
+├── DEPLOYMENT.md      Free-tier deploy guide (Oracle Cloud Always Free, HTTPS, cron)
+└── progress.md        This file — detailed architecture & feature reference
 ```
 
 **Auth:** HttpOnly cookie (SameSite=Lax). `CookieTokenAuthentication` reads from `verifydoc_token` cookie. No `localStorage` token. `AuthContext` holds `user` + `signIn/signOut`. Two-step login: credentials → TOTP 2FA.  
 **API base URL:** `/api/v1/` (proxied in dev via Vite; served directly in production).  
 **Build output:** `frontend/` → `static/react/` (WhiteNoise serves it; manifest read by `spa_view`).
+
+---
+
+## Recent Updates (2026-06-06)
+
+- **Pushed full codebase to GitHub** (`lydiagreene/medical-blockchain-system`, `main`). The React SPA + DRF API architecture is now the source of truth on the remote.
+- **`README.md` added** — collaborator overview + step-by-step local dev setup (backend + frontend), env reference, role model, testing, troubleshooting.
+- **`DEPLOYMENT.md` added** — free-tier deploy walkthrough for **Oracle Cloud Always Free** (ARM VM chosen because DeepFace/TensorFlow needs ~1 GB+ RAM, which 512 MB free tiers OOM). Covers VM setup, the two-layer Oracle firewall (VCN Security List + iptables), DuckDNS, Let's Encrypt HTTPS via Certbot standalone, and the daily expiry cron.
+- **Prod fix — `CSRF_TRUSTED_ORIGINS`:** now read from env in `settings.py`. Without it the Django `/admin/` login fails CSRF under `DEBUG=False` + HTTPS. (The React API is unaffected — it uses cookie auth without Django CSRF.)
+- **Prod fix — static volume:** `docker-compose.yml` now mounts `static_data:/app/staticfiles` on the `django` service so `collectstatic` output is shared with nginx (previously nginx served an empty `/static/`).
+- **Security/hygiene:** scrubbed real secrets (Ethereum private key, Pinata keys, Infura ID) that had been pasted into `.env_example` back to placeholders; `.gitignore` now also excludes `install_log.txt`, `staticfiles/`, `temp`, and `nginx/ssl/*.pem|*.pfx|*.key`.
+
+> **Deploy decision rationale:** same-origin hosting (Django serves React via nginx) is required because the auth cookie is `SameSite=Lax` and won't be sent on cross-site API calls — so a split Netlify-frontend + separate-backend setup would break auth without rewriting cookie/CORS/CSRF handling.
 
 ---
 
@@ -267,7 +284,7 @@ npm run build                      # builds to ../static/react/
 | **DRF throttling** | Login 5/min · 2FA 5/5min · Password reset 3/hr · Public verify 30/min · Face verify 20/hr · Anon 120/hr · User 1000/hr |
 | **Security headers** | `SecurityHeadersMiddleware`: CSP, `Referrer-Policy: strict-origin-when-cross-origin`, `Permissions-Policy`, `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY` |
 | **HTTPS** | Nginx forces HTTP → HTTPS redirect; HSTS 1 year with preload |
-| **Django hardening** | `SECURE_CONTENT_TYPE_NOSNIFF`, `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE` (when `DEBUG=False`) |
+| **Django hardening** | `SECURE_CONTENT_TYPE_NOSNIFF`, `SESSION_COOKIE_SECURE`, `CSRF_COOKIE_SECURE` (when `DEBUG=False`); `CSRF_TRUSTED_ORIGINS` from env for `/admin/` over HTTPS |
 | **Email verification** | Verification email sent on registration; `email_verified` flag on user; link at `/verify-email/:uid/:token` |
 | **Audit logging** | All auth events logged: `LOGIN_FAILED`, `LOGOUT`, `ACCOUNT_LOCKED`, `2FA_SETUP_COMPLETE`, `2FA_VERIFIED`, `TOTP_RESET`, password reset events |
 | **Sentry scrubbing** | `before_send` hook strips `DEPLOYER_PRIVATE_KEY`, `totp_secret`, backup codes, passwords from error reports |
@@ -366,6 +383,7 @@ See `.env_example` for full annotated list. Critical ones:
 | `SITE_URL` | Django base URL for email links |
 | `FRONTEND_URL` | React SPA URL (password reset links + QR codes point here) |
 | `CORS_ALLOWED_ORIGINS` | Production domains allowed to call the API |
+| `CSRF_TRUSTED_ORIGINS` | HTTPS origins trusted for CSRF — **required for Django `/admin/` login when `DEBUG=False`** (e.g. `https://yourdomain.com`) |
 | `TOKEN_EXPIRY_HOURS` | Auth token lifetime in hours (default: 8) |
 | `LOGIN_MAX_ATTEMPTS` | Failed login attempts before lockout (default: 10) |
 | `LOGIN_LOCKOUT_MINS` | Lockout duration in minutes (default: 15) |
