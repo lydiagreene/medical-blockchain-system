@@ -267,6 +267,7 @@ npm run build                      # builds to ../static/react/
 ```
 
 **Vite proxy:** `/api/` → `http://127.0.0.1:8000` (configured in `vite.config.js`).  
+**LAN access:** the dev server binds to `0.0.0.0` (`server.host: true`) so it's reachable from other devices on the network via the printed **Network** URL (e.g. `http://192.168.x.x:5173`); the proxy keeps the browser same-origin so the `SameSite=Lax` cookie still works. `server.strictPort: true` makes Vite fail fast if `5173` is taken instead of silently switching ports.  
 **SPA routing in prod:** `spa_view` reads `static/react/.vite/manifest.json` and injects hashed JS/CSS into `templates/react_spa.html`. In DEBUG mode it redirects to `FRONTEND_URL` (Vite dev server) so HMR still works.
 
 ---
