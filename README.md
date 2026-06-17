@@ -142,6 +142,20 @@ Visit **http://localhost:5173** in your browser. The Vite dev server proxies all
 
 > First login walks every user through **mandatory 2FA setup** — scan the QR code with an authenticator app (Google Authenticator, Authy, etc.) and **save the backup codes** shown once.
 
+#### Accessing from another device on your network (LAN)
+
+The dev server binds to `0.0.0.0` (`server.host: true` in `frontend/vite.config.js`), so you can open the app from a phone or another computer on the same Wi-Fi/LAN. On startup Vite prints a **Network** URL, e.g.:
+
+```
+➜  Network: http://192.168.100.57:5173/
+```
+
+Open that URL on the other device. The Vite proxy forwards `/api/` to Django for you, which keeps the browser **same-origin** — important because the `verifydoc_token` auth cookie is `SameSite=Lax` and is only sent on same-origin requests.
+
+Notes:
+- `server.strictPort: true` means Vite **fails fast** if `5173` is already in use rather than silently switching ports. Stop the other process (or change the port) and rerun.
+- Windows may prompt to allow Node through the firewall on first run — allow it for **private networks**.
+
 ---
 
 ## Environment Variables
